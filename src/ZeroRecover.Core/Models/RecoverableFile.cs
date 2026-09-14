@@ -11,6 +11,11 @@ public sealed class RecoverableFile
 
     public string OriginalPath { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Actual physical path on disk where data can currently be read from (e.g. $Recycle.Bin $R file or temp store).
+    /// </summary>
+    public string? PhysicalPath { get; set; }
+
     public long Size { get; set; }
 
     public string Extension { get; set; } = string.Empty;

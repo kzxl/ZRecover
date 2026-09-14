@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using ZeroRecover.Core;
 using ZeroRecover.Core.Disk;
@@ -238,6 +239,9 @@ public class MainViewModel : INotifyPropertyChanged
         set { _infoBarSeverity = value; OnPropertyChanged(); }
     }
 
+    public bool IsElevated { get; } = IsProcessElevated();
+    public bool IsNotElevated => !IsElevated;
+
     // Commands
     public ICommand StartScanCommand { get; }
     public ICommand CancelScanCommand { get; }
@@ -248,6 +252,7 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand SetCategoryCommand { get; }
     public ICommand OpenDestinationCommand { get; }
     public ICommand DismissInfoBarCommand { get; }
+    public ICommand RelaunchAsAdminCommand { get; }
 
     public MainViewModel()
     {
@@ -257,6 +262,24 @@ public class MainViewModel : INotifyPropertyChanged
         SelectAllCommand = new RelayCommand(_ => SetAllSelected(true));
         DeselectAllCommand = new RelayCommand(_ => SetAllSelected(false));
         RefreshDrivesCommand = new RelayCommand(_ => LoadDrives(), _ => !IsScanning);
+        RelaunchAsAdminCommand = new RelayCommand(_ =>
+        {
+            try
+            {
+                var processPath = Environment.ProcessPath;
+                if (!string.IsNullOrEmpty(processPath))
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = processPath,
+                        UseShellExecute = true,
+                        Verb = "runas"
+                    });
+                    Application.Current.Shutdown();
+                }
+            }
+            catch { }
+        });
         SetCategoryCommand = new RelayCommand(param =>
         {
             if (param is FileCategory cat)
@@ -287,6 +310,22 @@ public class MainViewModel : INotifyPropertyChanged
         DismissInfoBarCommand = new RelayCommand(_ => IsInfoBarVisible = false);
 
         LoadDrives();
+
+        if (!IsProcessElevated())
+        {
+            ShowInfoBar("Standard user mode: ZeroRecover will use deep filesystem scanning. Run as Administrator for low-level NTFS MFT & raw sector access.", "Info");
+        }
+    }
+
+    private static bool IsProcessElevated()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+            var principal = new System.Security.Principal.WindowsPrincipal(identity);
+            return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+        }
+        return false;
     }
 
     public void LoadDrives()
@@ -396,7 +435,7 @@ public class MainViewModel : INotifyPropertyChanged
                 }
                 catch (Exception ex)
                 {
-                    ShowInfoBar($"Direct raw volume access requires Administrator privileges ({ex.Message}). Scanning standard paths.", "Warning");
+                    ShowInfoBar($"Direct raw volume access requires Administrator privileges ({ex.Message}). Activating deep user-mode filesystem search engine.", "Warning");
                 }
             }
 

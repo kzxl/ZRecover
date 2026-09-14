@@ -129,10 +129,27 @@ public static class RecycleBinExtractor
     public static RecoverableFile ToRecoverableFile(RecycleIndexRecord rec, string sourceDrive)
     {
         string ext = Path.GetExtension(rec.OriginalFileName).ToLowerInvariant();
+        byte[]? preview = null;
+        if (rec.DataFileExists)
+        {
+            try
+            {
+                using var fs = File.OpenRead(rec.DataPath);
+                preview = new byte[Math.Min(256, (int)fs.Length)];
+                int r = fs.Read(preview, 0, preview.Length);
+                if (r < preview.Length)
+                {
+                    Array.Resize(ref preview, r);
+                }
+            }
+            catch { }
+        }
+
         return new RecoverableFile
         {
             FileName = rec.OriginalFileName,
             OriginalPath = rec.OriginalFullPath,
+            PhysicalPath = rec.DataPath,
             Size = rec.OriginalFileSize,
             Extension = ext,
             Category = ClassifyExtension(ext),
@@ -140,7 +157,8 @@ public static class RecycleBinExtractor
             Health = rec.DataFileExists ? RecoveryHealth.Excellent : RecoveryHealth.Overwritten,
             RecoveryMethod = "RECYCLE_BIN",
             SourceDrive = sourceDrive,
-            SourceOffset = 0
+            SourceOffset = 0,
+            PreviewBytes = preview
         };
     }
 

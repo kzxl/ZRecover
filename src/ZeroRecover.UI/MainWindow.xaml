@@ -242,6 +242,18 @@
                             <Border Background="#1D2236" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding SelectedDrive.DriveLetter, StringFormat='Target: {0}'}" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
                             </Border>
+
+                            <!-- Elevated Administrator Badge -->
+                            <Border Background="#162E28" BorderBrush="{DynamicResource SuccessAccentBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center"
+                                    Visibility="{Binding IsElevated, Converter={StaticResource BoolToVisConverter}}">
+                                <TextBlock Text="🛡️ Administrator (Raw MFT)" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource SuccessAccentBrush}"/>
+                            </Border>
+
+                            <!-- Standard User / Relaunch CTA Button -->
+                            <Button Content="🛡️ Run as Admin" Command="{Binding RelaunchAsAdminCommand}"
+                                    Style="{StaticResource GhostButtonStyle}" Height="24" Padding="8,0" FontSize="10.5" Margin="8,0,0,0" VerticalAlignment="Center"
+                                    Visibility="{Binding IsNotElevated, Converter={StaticResource BoolToVisConverter}}"
+                                    ToolTip="Relaunch with Administrator privileges for raw sector and direct MFT hardware access"/>
                         </StackPanel>
                         <TextBlock Text="{Binding CurrentModeDescription}" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0"/>
                     </StackPanel>
