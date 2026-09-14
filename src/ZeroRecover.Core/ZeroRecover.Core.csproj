@@ -10,9 +10,6 @@
 
   <ItemGroup>
     <PackageReference Include="System.Management" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\ZeroPlatform\ZeroSystem\src\ZeroSystem.Core\ZeroSystem.Core.csproj" />
+    <PackageReference Include="ZeroSystem.Core" Version="1.0.0" />
   </ItemGroup>
 </Project>

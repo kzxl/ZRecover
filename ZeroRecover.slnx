@@ -7,5 +7,4 @@
   <Folder Name="/tests/">
     <Project Path="tests/ZeroRecover.Tests/ZeroRecover.Tests.csproj" />
   </Folder>
-  <Project Path="../../ZeroPlatform/ZeroSystem/src/ZeroSystem.Core/ZeroSystem.Core.csproj" />
 </Solution>
