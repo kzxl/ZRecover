@@ -7,7 +7,13 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="app.ico" />
+    <Resource Include="app.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ZeroRecover.Core\ZeroRecover.Core.csproj" />

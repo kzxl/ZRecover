@@ -2,9 +2,11 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:ZeroRecover.UI.ViewModels"
+        xmlns:components="clr-namespace:ZeroRecover.UI.Views.Components"
         xmlns:models="clr-namespace:ZeroRecover.Core.Models;assembly=ZeroRecover.Core"
         Title="ZeroRecover — Sovereign Deep Data Recovery Suite" 
-        Height="800" Width="1200" MinHeight="600" MinWidth="950"
+        Icon="app.ico"
+        Height="840" Width="1280" MinHeight="660" MinWidth="1020"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource BgDarkBrush}"
         Foreground="{DynamicResource TextPrimaryBrush}"
@@ -16,77 +18,106 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/> <!-- Left Control Rail -->
+            <ColumnDefinition Width="280"/> <!-- Left Control Rail -->
             <ColumnDefinition Width="*"/>   <!-- Main Recovery Workspace -->
         </Grid.ColumnDefinitions>
 
-        <!-- Left Navigation & Drive Configuration Rail -->
+        <!-- ========================================================= -->
+        <!-- LEFT CONTROL & STORAGE RAIL                               -->
+        <!-- ========================================================= -->
         <Border Grid.Column="0" Background="{DynamicResource BgCardBrush}"
                 BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="0,0,1,0"
-                Padding="16">
+                Padding="16,14">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Brand Header -->
-                    <RowDefinition Height="Auto"/> <!-- Recovery Modes -->
-                    <RowDefinition Height="Auto"/> <!-- Drive Selector -->
-                    <RowDefinition Height="*"/>    <!-- Volume Info Card -->
-                    <RowDefinition Height="Auto"/> <!-- Zero Universe Badge -->
+                    <RowDefinition Height="Auto"/> <!-- Drive Selector Card -->
+                    <RowDefinition Height="Auto"/> <!-- Volume Specs & Usage Card -->
+                    <RowDefinition Height="*"/>    <!-- Recovery Architecture Modes -->
+                    <RowDefinition Height="Auto"/> <!-- Sovereign Safe Barrier Status -->
                 </Grid.RowDefinitions>
 
                 <!-- Brand Header -->
-                <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="⚡" FontSize="22" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBlock Text="ZeroRecover" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Source="app.png" Width="32" Height="32" Margin="0,0,10,0" VerticalAlignment="Center"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="ZeroRecover" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <Border Background="#1C2033" CornerRadius="4" Padding="5,1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="PRO" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Sovereign Deep Recovery Engine" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Source Drive Selector Card -->
+                <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Padding="12,10" Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock Text="SOURCE STORAGE DRIVE" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center"/>
+                            <Button Content="🔄 Refresh" Command="{Binding RefreshDrivesCommand}"
+                                    Style="{StaticResource GhostButtonStyle}" HorizontalAlignment="Right" FontSize="11" ToolTip="Rescan connected drives &amp; USB volumes"/>
+                        </Grid>
+
+                        <ComboBox ItemsSource="{Binding Drives}" SelectedItem="{Binding SelectedDrive}"
+                                  Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                                  BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="8,6">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="💾" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding DriveLetter}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                                <TextBlock Text=" (" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                <TextBlock Text="{Binding VolumeLabel}" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                <TextBlock Text=")" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding FileSystem}" FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding FormattedTotal}" HorizontalAlignment="Right"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </StackPanel>
-                    <TextBlock Text="Sovereign Deep Recovery Engine" FontSize="11.5" Foreground="{DynamicResource TextMutedBrush}" Margin="28,2,0,0"/>
-                </StackPanel>
+                </Border>
 
-                <!-- Recovery Mode Selector -->
-                <StackPanel Grid.Row="1" Margin="0,0,0,20">
-                    <TextBlock Text="RECOVERY MODES" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,8"/>
-                    
-                    <RadioButton Content="🔍 Quick Undelete (MFT/FAT)" IsChecked="{Binding CurrentMode, Converter={x:Null}, Mode=OneWay}"
-                                 GroupName="RecoveryMode" Margin="0,0,0,6" Foreground="{DynamicResource TextPrimaryBrush}"
-                                 Command="{Binding DataContext.StartScanCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                 CommandParameter="QuickUndelete"
-                                 Click="QuickUndelete_Click"/>
+                <!-- Volume Specs & Capacity Meter Card -->
+                <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}" Padding="12,10" Margin="0,0,0,14"
+                        DataContext="{Binding SelectedDrive}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock Text="VOLUME CAPACITY" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
+                            <TextBlock HorizontalAlignment="Right" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}">
+                                <Run Text="{Binding FormattedFree, Mode=OneWay}"/>
+                                <Run Text=" free of "/>
+                                <Run Text="{Binding FormattedTotal, Mode=OneWay}"/>
+                            </TextBlock>
+                        </Grid>
 
-                    <RadioButton Content="🧬 Deep Raw Carving" GroupName="RecoveryMode" Margin="0,0,0,6" 
-                                 Foreground="{DynamicResource TextPrimaryBrush}"
-                                 Click="DeepCarve_Click"/>
+                        <!-- Capacity Usage Meter -->
+                        <Grid Margin="0,2,0,8">
+                            <ProgressBar Value="{Binding Converter={StaticResource DriveUsageConverter}}" Maximum="100" Height="6"
+                                         Foreground="{DynamicResource PrimaryAccentBrush}" Background="{DynamicResource BgInputBrush}"
+                                         BorderThickness="0"/>
+                        </Grid>
 
-                    <RadioButton Content="🛡️ Shadow Explorer (VSS)" GroupName="RecoveryMode" Margin="0,0,0,6" 
-                                 Foreground="{DynamicResource TextPrimaryBrush}"
-                                 Click="Vss_Click"/>
-
-                    <RadioButton Content="🗑️ Recycle Rescue" GroupName="RecoveryMode" Margin="0,0,0,6" 
-                                 Foreground="{DynamicResource TextPrimaryBrush}"
-                                 Click="Recycle_Click"/>
-                </StackPanel>
-
-                <!-- Target Volume Selector -->
-                <StackPanel Grid.Row="2" Margin="0,0,0,16">
-                    <TextBlock Text="SOURCE STORAGE DRIVE" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,6"/>
-                    <ComboBox ItemsSource="{Binding Drives}" SelectedItem="{Binding SelectedDrive}"
-                              Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
-                              Padding="8,6">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding DriveLetter}" FontWeight="Bold" Margin="0,0,6,0"/>
-                                    <TextBlock Text="{Binding VolumeLabel}" Margin="0,0,6,0"/>
-                                    <TextBlock Text="{Binding FormattedTotal}" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </StackPanel>
-
-                <!-- Volume Specs Details Card -->
-                <Border Grid.Row="3" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,16" VerticalAlignment="Top">
-                    <StackPanel DataContext="{Binding SelectedDrive}">
-                        <TextBlock Text="VOLUME SPECIFICATIONS" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}" Margin="0,0,0,8"/>
+                        <!-- Hardware & Filesystem Details -->
                         <Grid Margin="0,0,0,4">
                             <TextBlock Text="File System:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
                             <TextBlock Text="{Binding FileSystem}" HorizontalAlignment="Right" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="11"/>
@@ -96,39 +127,95 @@
                             <TextBlock Text="{Binding ClusterSize, StringFormat='{}{0} Bytes'}" HorizontalAlignment="Right" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="11"/>
                         </Grid>
                         <Grid Margin="0,0,0,4">
-                            <TextBlock Text="Free Space:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
-                            <TextBlock Text="{Binding FormattedFree}" HorizontalAlignment="Right" Foreground="{DynamicResource SuccessAccentBrush}" FontWeight="Bold" FontSize="11"/>
+                            <TextBlock Text="Sectors/Cluster:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                            <TextBlock Text="{Binding SectorsPerCluster}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
                         </Grid>
                         <Grid>
-                            <TextBlock Text="Device Path:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                            <TextBlock Text="Raw Path:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
                             <TextBlock Text="{Binding DevicePath}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
                         </Grid>
                     </StackPanel>
                 </Border>
 
-                <!-- Version & Status -->
-                <Border Grid.Row="4" Background="#181B2C" BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="1"
-                        CornerRadius="6" Padding="10,6">
+                <!-- Recovery Architecture Modes -->
+                <StackPanel Grid.Row="3">
+                    <TextBlock Text="RECOVERY ARCHITECTURE" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,8"/>
+
+                    <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                 IsChecked="True" Click="QuickUndelete_Click">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔍" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Quick Undelete" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </StackPanel>
+                            <TextBlock Text="Scans NTFS $MFT &amp; FAT directory tables for recently purged records."
+                                       FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="20,2,0,0"/>
+                        </StackPanel>
+                    </RadioButton>
+
+                    <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                 Click="DeepCarve_Click">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🧬" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Deep Raw Carving" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </StackPanel>
+                            <TextBlock Text="Byte-level signature carving across unallocated disk clusters."
+                                       FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="20,2,0,0"/>
+                        </StackPanel>
+                    </RadioButton>
+
+                    <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                 Click="Vss_Click">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🛡️" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Shadow Explorer" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </StackPanel>
+                            <TextBlock Text="Mounts historical Windows VSS shadow copies for deleted files."
+                                       FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="20,2,0,0"/>
+                        </StackPanel>
+                    </RadioButton>
+
+                    <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                 Click="Recycle_Click">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🗑️" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Recycle Rescue" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </StackPanel>
+                            <TextBlock Text="Decodes INFO2 / $I records to restore emptied Recycle Bin items."
+                                       FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="20,2,0,0"/>
+                        </StackPanel>
+                    </RadioButton>
+                </StackPanel>
+
+                <!-- Sovereign Safe Barrier Status -->
+                <Border Grid.Row="4" Background="#14192A" BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="1"
+                        CornerRadius="6" Padding="10,8" Margin="0,10,0,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <TextBlock Text="●" Foreground="{DynamicResource SuccessAccentBrush}" Margin="0,0,6,0"/>
-                        <TextBlock Text="Zero-Write Safe Barrier Active" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
+                        <TextBlock Text="●" Foreground="{DynamicResource SuccessAccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Zero-Write Safe Barrier Active" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
             </Grid>
         </Border>
 
-        <!-- Main Recovery Workspace -->
-        <Grid Grid.Column="1" Margin="16,14,16,14">
+        <!-- ========================================================= -->
+        <!-- RIGHT MAIN RECOVERY WORKSPACE                             -->
+        <!-- ========================================================= -->
+        <Grid Grid.Column="1" Margin="16,14,16,12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Top Action Header Bar -->
-                <RowDefinition Height="Auto"/> <!-- Scan Progress & Telemetry -->
-                <RowDefinition Height="Auto"/> <!-- Filter & Search Toolstrip -->
-                <RowDefinition Height="*"/>    <!-- Virtualized File Candidates Grid -->
+                <RowDefinition Height="Auto"/> <!-- In-Window Notification InfoBar -->
+                <RowDefinition Height="Auto"/> <!-- Scan Progress & Telemetry Card -->
+                <RowDefinition Height="Auto"/> <!-- Category Chips & Search Toolstrip -->
+                <RowDefinition Height="*"/>    <!-- File Candidates Grid + File Inspector -->
                 <RowDefinition Height="Auto"/> <!-- Bottom Restoration & Safety Barrier Bar -->
             </Grid.RowDefinitions>
 
-            <!-- Top Action Header Bar -->
-            <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,12" Padding="14,10">
+            <!-- 1. Top Action Header Bar -->
+            <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,10" Padding="14,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -136,23 +223,32 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding CurrentModeTitle}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBlock Text="{Binding StatusText}" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding CurrentModeTitle}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <Border Background="#1D2236" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding SelectedDrive.DriveLetter, StringFormat='Target: {0}'}" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="{Binding CurrentModeDescription}" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0"/>
                     </StackPanel>
 
-                    <!-- Scan Action Buttons -->
+                    <!-- Scan Action CTA Buttons -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Content="⚡ Start Scan" Command="{Binding StartScanCommand}"
-                                Style="{StaticResource AccentButtonStyle}" Margin="0,0,8,0"/>
-                        <Button Content="✕ Cancel" Command="{Binding CancelScanCommand}"
-                                Style="{StaticResource AccentButtonStyle}" Background="#3A1C28" Foreground="#F38BA8"
+                                Style="{StaticResource AccentButtonStyle}" Height="32" Padding="18,0" Margin="0,0,8,0"/>
+                        <Button Content="✕ Cancel Scan" Command="{Binding CancelScanCommand}"
+                                Style="{StaticResource DangerButtonStyle}" Height="32" Padding="14,0"
                                 Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisConverter}}"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Live Scan Progress Bar -->
-            <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,10" Padding="12,8"
+            <!-- 2. In-Window InfoBar Banner -->
+            <components:InfoBar Grid.Row="1"
+                                Visibility="{Binding IsInfoBarVisible, Converter={StaticResource BoolToVisConverter}}"/>
+
+            <!-- 3. Live Scan Progress & Telemetry Card -->
+            <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,10" Padding="12,10"
                     Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisConverter}}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -160,116 +256,246 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid Margin="0,0,0,6">
-                        <TextBlock Text="{Binding StatusText}" FontSize="11" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <TextBlock Text="{Binding ThroughputText}" HorizontalAlignment="Right" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
+                        <TextBlock Text="{Binding StatusText}" FontSize="11.5" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding ThroughputText}" HorizontalAlignment="Right" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
                     </Grid>
                     <ProgressBar Grid.Row="1" Value="{Binding ScanProgress}" Maximum="100" Height="6"
-                                 Foreground="{DynamicResource PrimaryAccentBrush}" Background="{DynamicResource BgInputBrush}"/>
+                                 Foreground="{DynamicResource PrimaryAccentBrush}" Background="{DynamicResource BgInputBrush}"
+                                 BorderThickness="0"/>
                 </Grid>
             </Border>
 
-            <!-- Filter & Search Toolstrip -->
-            <Border Grid.Row="2" Margin="0,0,0,10">
+            <!-- 4. Category Filter Chips & Search Toolstrip -->
+            <Border Grid.Row="3" Margin="0,0,0,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="220"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/> <!-- Category Filter Chips -->
+                        <ColumnDefinition Width="*"/>    <!-- Search Input -->
+                        <ColumnDefinition Width="Auto"/> <!-- Selection Tools -->
                     </Grid.ColumnDefinitions>
 
-                    <!-- Search Box -->
-                    <TextBox Text="{Binding SearchFilter, UpdateSourceTrigger=PropertyChanged}"
-                             Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
-                             BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="8,5"
-                             ToolTip="Filter results by filename..."/>
+                    <!-- Category Filter Chips -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <RadioButton Content="{Binding CountAll, StringFormat='All ({0})'}" GroupName="CategoryFilter"
+                                     IsChecked="True" Style="{StaticResource CategoryChipStyle}"
+                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.All}"/>
 
-                    <!-- Selection Buttons -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <RadioButton Content="{Binding CountDocuments, StringFormat='📄 Documents ({0})'}" GroupName="CategoryFilter"
+                                     Style="{StaticResource CategoryChipStyle}"
+                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Documents}"/>
+
+                        <RadioButton Content="{Binding CountPictures, StringFormat='🖼️ Photos ({0})'}" GroupName="CategoryFilter"
+                                     Style="{StaticResource CategoryChipStyle}"
+                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Pictures}"/>
+
+                        <RadioButton Content="{Binding CountMedia, StringFormat='🎬 Media ({0})'}" GroupName="CategoryFilter"
+                                     Style="{StaticResource CategoryChipStyle}"
+                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Videos}"/>
+
+                        <RadioButton Content="{Binding CountArchives, StringFormat='📦 Archives ({0})'}" GroupName="CategoryFilter"
+                                     Style="{StaticResource CategoryChipStyle}"
+                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Archives}"/>
+
+                        <RadioButton Content="{Binding CountOthers, StringFormat='📁 Others ({0})'}" GroupName="CategoryFilter"
+                                     Style="{StaticResource CategoryChipStyle}"
+                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Other}"/>
+                    </StackPanel>
+
+                    <!-- Search Filter Box -->
+                    <TextBox Grid.Column="1" Text="{Binding SearchFilter, UpdateSourceTrigger=PropertyChanged}"
+                             Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="10,5" Margin="8,0"
+                             VerticalAlignment="Center" Height="28"
+                             ToolTip="Filter results by filename or extension..."/>
+
+                    <!-- Selection Utility Buttons -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Content="Select All" Command="{Binding SelectAllCommand}" 
-                                Style="{StaticResource AccentButtonStyle}" Background="{DynamicResource BgCardBrush}" Padding="10,4" Margin="0,0,6,0"/>
+                                Style="{StaticResource SecondaryButtonStyle}" Height="28" Padding="10,0" Margin="0,0,6,0"/>
                         <Button Content="Deselect All" Command="{Binding DeselectAllCommand}" 
-                                Style="{StaticResource AccentButtonStyle}" Background="{DynamicResource BgCardBrush}" Padding="10,4"/>
+                                Style="{StaticResource SecondaryButtonStyle}" Height="28" Padding="10,0"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Virtualized Candidates Grid -->
-            <ListView Grid.Row="3" ItemsSource="{Binding DisplayFiles}" Margin="0,0,0,12">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Width="40">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsSelected}"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
+            <!-- 5. Candidates Grid & Docked File Inspector -->
+            <Grid Grid.Row="4" Margin="0,0,0,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/> <!-- Inspector Panel -->
+                </Grid.RowDefinitions>
 
-                        <GridViewColumn Header="Health" Width="100">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border Background="#1C2136" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left">
-                                        <TextBlock Text="{Binding Health}" Foreground="{Binding Health, Converter={StaticResource HealthBrushConverter}}"
-                                                   FontSize="10.5" FontWeight="Bold"/>
-                                    </Border>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
+                <!-- Virtualized Candidate Files ListView -->
+                <ListView Grid.Row="0" ItemsSource="{Binding DisplayFiles}" SelectedItem="{Binding SelectedFile}">
+                    <ListView.View>
+                        <GridView>
+                            <!-- Selection Checkbox -->
+                            <GridViewColumn Width="36">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsSelected}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Click="FileCheckBox_Click"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
 
-                        <GridViewColumn Header="File Name" Width="280">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding FileName}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
+                            <!-- Health Status Pill -->
+                            <GridViewColumn Header="Health" Width="105">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#1C2136" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Health}" Foreground="{Binding Health, Converter={StaticResource HealthBrushConverter}}"
+                                                       FontSize="10.5" FontWeight="Bold"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
 
-                        <GridViewColumn Header="Size" Width="90" DisplayMemberBinding="{Binding FormattedSize}"/>
+                            <!-- File Name with Icon -->
+                            <GridViewColumn Header="File Name" Width="280">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Category, Converter={StaticResource CategoryIconConverter}}" Margin="0,0,6,0"/>
+                                            <TextBlock Text="{Binding FileName}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
 
-                        <GridViewColumn Header="Category" Width="90" DisplayMemberBinding="{Binding Category}"/>
+                            <!-- Formatted Size (Numeric Right-Alignment per standards) -->
+                            <GridViewColumn Header="Size" Width="95">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding FormattedSize}" FontFamily="{StaticResource MonospaceFont}"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
 
-                        <GridViewColumn Header="Method" Width="110" DisplayMemberBinding="{Binding RecoveryMethod}"/>
+                            <!-- Category -->
+                            <GridViewColumn Header="Category" Width="90" DisplayMemberBinding="{Binding Category}"/>
 
-                        <GridViewColumn Header="Original Path" Width="220" DisplayMemberBinding="{Binding OriginalPath}"/>
+                            <!-- Discovery Method -->
+                            <GridViewColumn Header="Method" Width="110" DisplayMemberBinding="{Binding RecoveryMethod}"/>
 
-                        <GridViewColumn Header="Deleted Time" Width="130" DisplayMemberBinding="{Binding DeletedTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
-                    </GridView>
-                </ListView.View>
-            </ListView>
+                            <!-- Original Path -->
+                            <GridViewColumn Header="Original Path" Width="260" DisplayMemberBinding="{Binding OriginalPath}"/>
 
-            <!-- Bottom Restoration & Safety Barrier Bar -->
-            <Border Grid.Row="4" Style="{StaticResource CardBorderStyle}" Padding="14,10">
+                            <!-- Deleted Timestamp -->
+                            <GridViewColumn Header="Deleted Time" Width="130" DisplayMemberBinding="{Binding DeletedTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <!-- Docked File Candidate Inspector & Hex Preview Drawer -->
+                <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Padding="12,10" Margin="0,8,0,0"
+                        Visibility="{Binding HasSelectedFile, Converter={StaticResource BoolToVisConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="360"/> <!-- Metadata Summary -->
+                            <ColumnDefinition Width="*"/>   <!-- Monospace Hex Preview -->
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Candidate Metadata Details -->
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0" DataContext="{Binding SelectedFile}">
+                            <TextBlock Text="CANDIDATE INSPECTOR" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}" Margin="0,0,0,6"/>
+                            
+                            <Grid Margin="0,0,0,3">
+                                <TextBlock Text="Target File:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                <TextBlock Text="{Binding FileName}" HorizontalAlignment="Right" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="11" TextTrimming="CharacterEllipsis" MaxWidth="240"/>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,3">
+                                <TextBlock Text="Health Assessment:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                <TextBlock Text="{Binding Health}" HorizontalAlignment="Right" Foreground="{Binding Health, Converter={StaticResource HealthBrushConverter}}" FontWeight="Bold" FontSize="11"/>
+                            </Grid>
+
+                            <TextBlock Text="{Binding Health, Converter={StaticResource HealthDescConverter}}"
+                                       FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,6"/>
+
+                            <Grid Margin="0,0,0,3">
+                                <TextBlock Text="Method / Offset:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                <TextBlock HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11">
+                                    <Run Text="{Binding RecoveryMethod, Mode=OneWay}"/>
+                                    <Run Text=" @ 0x"/>
+                                    <Run Text="{Binding SourceOffset, StringFormat='{}{0:X8}', Mode=OneWay}"/>
+                                </TextBlock>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,3">
+                                <TextBlock Text="Cluster Extents:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                <TextBlock Text="{Binding DataExtents.Count, StringFormat='{}{0} runs mapped'}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
+                            </Grid>
+
+                            <Grid>
+                                <TextBlock Text="MFT Resident:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                <TextBlock Text="{Binding IsResident, StringFormat='{}{0}'}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Monospace Hex Viewer Header -->
+                        <Border Grid.Column="1" Background="{DynamicResource BgInputBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1"
+                                CornerRadius="6" Padding="10,6">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="HEADER SIGNATURE / SECTOR PREVIEW" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,4"/>
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="85">
+                                    <TextBlock Text="{Binding SelectedFilePreviewBytes, Converter={StaticResource HexDumpConverter}}"
+                                               FontFamily="{StaticResource MonospaceFont}" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- 6. Bottom Restoration & Safety Barrier Bar -->
+            <Border Grid.Row="5" Style="{StaticResource CardBorderStyle}" Padding="14,10">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/> <!-- Zero-Write Safety Barrier Alert Banner -->
+                        <RowDefinition Height="Auto"/> <!-- Destination Path & Restore CTA Row -->
                     </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
 
-                    <!-- Destination Folder Row -->
-                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="Recovery Destination:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,10,0"/>
-                        <TextBox Text="{Binding DestinationPath, UpdateSourceTrigger=PropertyChanged}"
-                                 Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
-                                 BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="8,4" Width="400"/>
-                        <Button Content="Browse..." Click="BrowseDestination_Click"
-                                Style="{StaticResource AccentButtonStyle}" Background="{DynamicResource BgCardBrush}" Margin="6,0,0,0"/>
-                    </StackPanel>
-
-                    <!-- Restore CTA Button -->
-                    <Button Grid.Row="0" Grid.Column="1" Content="⚡ Restore Selected Files"
-                            Command="{Binding RestoreSelectedCommand}"
-                            Style="{StaticResource AccentButtonStyle}" Height="34" Padding="18,0"/>
-
-                    <!-- Safety Barrier Message Banner -->
-                    <Border Grid.Row="1" Grid.ColumnSpan="2" Margin="0,8,0,0" Padding="8,4" CornerRadius="4"
-                            Background="{Binding IsDestinationSafe, Converter={x:Null}}">
-                        <TextBlock Text="{Binding SafetyMessage}" FontSize="11"
-                                   Foreground="{Binding IsDestinationSafe, Converter={x:Null}}"/>
+                    <!-- Zero-Write Safety Alert Banner -->
+                    <Border Grid.Row="0" Margin="0,0,0,10" Padding="10,6" CornerRadius="6"
+                            Background="{Binding IsDestinationSafe, Converter={StaticResource SafetyBgConverter}}"
+                            BorderBrush="{Binding IsDestinationSafe, Converter={StaticResource SafetyBorderConverter}}"
+                            BorderThickness="1">
+                        <TextBlock Text="{Binding SafetyMessage}" FontSize="11.5" FontWeight="SemiBold"
+                                   Foreground="{Binding IsDestinationSafe, Converter={StaticResource SafetyBrushConverter}}"/>
                     </Border>
+
+                    <!-- Destination Path & Primary Restore CTA -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Destination Folder Inputs -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Recovery Destination:" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Margin="0,0,10,0"/>
+                            <TextBox Text="{Binding DestinationPath, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                                     BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="8,5" Width="380"
+                                     VerticalAlignment="Center" Height="30"/>
+                            <Button Content="Browse..." Click="BrowseDestination_Click"
+                                    Style="{StaticResource SecondaryButtonStyle}" Height="30" Padding="12,0" Margin="6,0,0,0"/>
+                            <Button Content="📁 Open Folder" Command="{Binding OpenDestinationCommand}"
+                                    Style="{StaticResource GhostButtonStyle}" Height="30" Padding="8,0" Margin="4,0,0,0"
+                                    ToolTip="Open restored destination in Windows Explorer"/>
+                        </StackPanel>
+
+                        <!-- Primary Restore CTA Button -->
+                        <Button Grid.Column="1" Content="{Binding RestoreButtonText}"
+                                Command="{Binding RestoreSelectedCommand}"
+                                Style="{StaticResource AccentButtonStyle}" Height="36" Padding="22,0" FontSize="13"/>
+                    </Grid>
                 </Grid>
             </Border>
         </Grid>

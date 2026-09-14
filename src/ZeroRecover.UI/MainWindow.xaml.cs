@@ -33,9 +33,13 @@ public partial class MainWindow : Window
         ViewModel.CurrentMode = ScanMode.RecycleBin;
     }
 
+    private void FileCheckBox_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.UpdateSelectionStats();
+    }
+
     private void BrowseDestination_Click(object sender, RoutedEventArgs e)
     {
-        // Simple folder browser dialog simulation using WinForms FolderBrowserDialog if available or standard input
         using var dialog = new System.Windows.Forms.FolderBrowserDialog();
         dialog.Description = "Select Safe Recovery Destination Folder (MUST NOT be the drive being scanned)";
         dialog.UseDescriptionForTitle = true;
