@@ -3,6 +3,7 @@ using ZeroRecover.Core.Carving;
 using ZeroRecover.Core.Disk;
 using ZeroRecover.Core.FileSystems.Ntfs;
 using ZeroRecover.Core.FileSystems.RecycleBin;
+using ZeroRecover.Core.Intelligence;
 using ZeroRecover.Core.Models;
 using ZeroRecover.Core.Safety;
 using ZeroRecover.Core.Vss;
@@ -498,6 +499,11 @@ public sealed class RecoveryService
 
     private static List<RecoverableFile> FilterResults(List<RecoverableFile> files, ScanOptions options)
     {
+        foreach (var f in files)
+        {
+            SmartFileIdentifier.Analyze(f);
+        }
+
         var query = files.AsEnumerable();
 
         if (options.FilterCategory != FileCategory.All)

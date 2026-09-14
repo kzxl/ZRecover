@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Input;
 using ZeroRecover.Core;
 using ZeroRecover.Core.Disk;
+using ZeroRecover.Core.Intelligence;
 using ZeroRecover.Core.Models;
 using ZeroRecover.Core.Safety;
 
@@ -113,15 +114,24 @@ public class MainViewModel : INotifyPropertyChanged
             if (_selectedFile != value)
             {
                 _selectedFile = value;
+                if (_selectedFile != null)
+                {
+                    SmartFileIdentifier.Analyze(_selectedFile);
+                }
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(HasSelectedFile));
                 OnPropertyChanged(nameof(SelectedFilePreviewBytes));
+                OnPropertyChanged(nameof(SelectedFilePreviewText));
+                OnPropertyChanged(nameof(SelectedFileHasSuggestion));
+                CommandManager.InvalidateRequerySuggested();
             }
         }
     }
 
     public bool HasSelectedFile => SelectedFile != null;
+    public bool SelectedFileHasSuggestion => SelectedFile?.HasSuggestion ?? false;
     public byte[]? SelectedFilePreviewBytes => SelectedFile?.PreviewBytes ?? SelectedFile?.ResidentData;
+    public string? SelectedFilePreviewText => SelectedFile?.PreviewText;
 
     private bool _isScanning;
     public bool IsScanning
@@ -253,6 +263,7 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand OpenDestinationCommand { get; }
     public ICommand DismissInfoBarCommand { get; }
     public ICommand RelaunchAsAdminCommand { get; }
+    public ICommand ApplySuggestedNameCommand { get; }
 
     public MainViewModel()
     {
@@ -262,6 +273,19 @@ public class MainViewModel : INotifyPropertyChanged
         SelectAllCommand = new RelayCommand(_ => SetAllSelected(true));
         DeselectAllCommand = new RelayCommand(_ => SetAllSelected(false));
         RefreshDrivesCommand = new RelayCommand(_ => LoadDrives(), _ => !IsScanning);
+        ApplySuggestedNameCommand = new RelayCommand(_ =>
+        {
+            if (SelectedFile != null && SelectedFile.HasSuggestion)
+            {
+                string oldName = SelectedFile.FileName;
+                SelectedFile.ApplySuggestedName();
+                OnPropertyChanged(nameof(SelectedFile));
+                OnPropertyChanged(nameof(SelectedFileHasSuggestion));
+                UpdateCategoryCounts();
+                ApplyFilter();
+                ShowInfoBar($"Renamed '{oldName}' -> '{SelectedFile.FileName}'", "Success");
+            }
+        }, _ => SelectedFile != null && SelectedFile.HasSuggestion);
         RelaunchAsAdminCommand = new RelayCommand(_ =>
         {
             try

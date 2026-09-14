@@ -416,70 +416,87 @@
                     <RowDefinition Height="Auto"/> <!-- Inspector Panel -->
                 </Grid.RowDefinitions>
 
-                <!-- Virtualized Candidate Files ListView -->
-                <ListView Grid.Row="0" ItemsSource="{Binding DisplayFiles}" SelectedItem="{Binding SelectedFile}"
+                <!-- Virtualized Candidate Files DataGrid -->
+                <DataGrid Grid.Row="0" ItemsSource="{Binding DisplayFiles}" SelectedItem="{Binding SelectedFile}"
                           IsEnabled="{Binding IsNotScanning}">
-                    <ListView.View>
-                        <GridView>
-                            <!-- Selection Checkbox -->
-                            <GridViewColumn Width="36">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <CheckBox IsChecked="{Binding IsSelected}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                  Click="FileCheckBox_Click"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                    <DataGrid.Columns>
+                        <!-- Selection Checkbox -->
+                        <DataGridTemplateColumn Width="38" CanUserResize="False">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Click="FileCheckBox_Click"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                            <!-- Health Status Pill -->
-                            <GridViewColumn Header="Health" Width="105">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border Background="#1C2136" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Health}" Foreground="{Binding Health, Converter={StaticResource HealthBrushConverter}}"
-                                                       FontSize="10.5" FontWeight="Bold"/>
+                        <!-- Health Status Pill -->
+                        <DataGridTemplateColumn Header="Health" Width="95" SortMemberPath="Health">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Background="#1C2136" CornerRadius="4" Padding="6,2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Health}" Foreground="{Binding Health, Converter={StaticResource HealthBrushConverter}}"
+                                                   FontSize="10.5" FontWeight="Bold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- File Name with Icon & Smart Extension Pill -->
+                        <DataGridTemplateColumn Header="File Name" Width="260" SortMemberPath="FileName">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Category, Converter={StaticResource CategoryIconConverter}}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding FileName}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="180"/>
+                                        <Border Background="#282245" BorderBrush="{DynamicResource SecondaryAccentBrush}" BorderThickness="1" CornerRadius="3" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center"
+                                                Visibility="{Binding HasSuggestion, Converter={StaticResource BoolToVisConverter}}"
+                                                ToolTip="{Binding SuggestedFileName, StringFormat='Suggested name: {0}'}">
+                                            <TextBlock Text="{Binding SuggestedExtension, FallbackValue='✨'}" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource SecondaryAccentBrush}"/>
                                         </Border>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                            <!-- File Name with Icon -->
-                            <GridViewColumn Header="File Name" Width="280">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Category, Converter={StaticResource CategoryIconConverter}}" Margin="0,0,6,0"/>
-                                            <TextBlock Text="{Binding FileName}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                        <!-- Smart Format / Suggestion Column -->
+                        <DataGridTemplateColumn Header="Format / Smart Suggestion" Width="210" SortMemberPath="DetectedFormat">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding DetectedFormat, FallbackValue='Unknown'}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding SuggestedFileName, StringFormat='💡 {0}'}" Foreground="{DynamicResource PrimaryAccentBrush}" FontSize="10" FontWeight="SemiBold"
+                                                   Visibility="{Binding HasSuggestion, Converter={StaticResource BoolToVisConverter}}" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                            <!-- Formatted Size (Numeric Right-Alignment per standards) -->
-                            <GridViewColumn Header="Size" Width="100">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding FormattedSize}" FontFamily="{StaticResource MonospaceFont}"
-                                                   TextAlignment="Right" HorizontalAlignment="Stretch"
-                                                   Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                        <!-- Formatted Size -->
+                        <DataGridTemplateColumn Header="Size" Width="85" SortMemberPath="Size">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding FormattedSize}" FontFamily="{StaticResource MonospaceFont}"
+                                               TextAlignment="Right" HorizontalAlignment="Stretch"
+                                               Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                            <!-- Category -->
-                            <GridViewColumn Header="Category" Width="90" DisplayMemberBinding="{Binding Category}"/>
+                        <!-- Category -->
+                        <DataGridTextColumn Header="Category" Width="90" Binding="{Binding Category}"/>
 
-                            <!-- Discovery Method -->
-                            <GridViewColumn Header="Method" Width="110" DisplayMemberBinding="{Binding RecoveryMethod}"/>
+                        <!-- Method -->
+                        <DataGridTextColumn Header="Method" Width="105" Binding="{Binding RecoveryMethod}"/>
 
-                            <!-- Original Path -->
-                            <GridViewColumn Header="Original Path" Width="260" DisplayMemberBinding="{Binding OriginalPath}"/>
+                        <!-- Original Path -->
+                        <DataGridTextColumn Header="Original Path" Width="240" Binding="{Binding OriginalPath}"/>
 
-                            <!-- Deleted Timestamp -->
-                            <GridViewColumn Header="Deleted Time" Width="130" DisplayMemberBinding="{Binding DeletedTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                        <!-- Deleted Time -->
+                        <DataGridTextColumn Header="Deleted Time" Width="125" Binding="{Binding DeletedTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
 
                 <!-- Scanning / Loading Center Overlay over the Grid -->
                 <Border Grid.Row="0" Background="#DD10121E" CornerRadius="8"
@@ -527,67 +544,125 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Docked File Candidate Inspector & Hex Preview Drawer -->
+                <!-- Docked File Candidate Inspector & Dual-Tab Preview Drawer -->
                 <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Padding="12,10" Margin="0,8,0,0"
                         Visibility="{Binding HasSelectedFile, Converter={StaticResource BoolToVisConverter}}">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="360"/> <!-- Metadata Summary -->
-                            <ColumnDefinition Width="*"/>   <!-- Monospace Hex Preview -->
-                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Smart Suggestion Banner -->
+                            <RowDefinition Height="*"/>    <!-- Inspector Details & Dual Tab Preview -->
+                        </Grid.RowDefinitions>
 
-                        <!-- Candidate Metadata Details -->
-                        <StackPanel Grid.Column="0" Margin="0,0,16,0" DataContext="{Binding SelectedFile}">
-                            <TextBlock Text="CANDIDATE INSPECTOR" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}" Margin="0,0,0,6"/>
-                            
-                            <Grid Margin="0,0,0,3">
-                                <TextBlock Text="Target File:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
-                                <TextBlock Text="{Binding FileName}" HorizontalAlignment="Right" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="11" TextTrimming="CharacterEllipsis" MaxWidth="240"/>
-                            </Grid>
-
-                            <Grid Margin="0,0,0,3">
-                                <TextBlock Text="Health Assessment:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
-                                <TextBlock Text="{Binding Health}" HorizontalAlignment="Right" Foreground="{Binding Health, Converter={StaticResource HealthBrushConverter}}" FontWeight="Bold" FontSize="11"/>
-                            </Grid>
-
-                            <TextBlock Text="{Binding Health, Converter={StaticResource HealthDescConverter}}"
-                                       FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,6"/>
-
-                            <Grid Margin="0,0,0,3">
-                                <TextBlock Text="Method / Offset:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
-                                <TextBlock HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11">
-                                    <Run Text="{Binding RecoveryMethod, Mode=OneWay}"/>
-                                    <Run Text=" @ 0x"/>
-                                    <Run Text="{Binding SourceOffset, StringFormat='{}{0:X8}', Mode=OneWay}"/>
-                                </TextBlock>
-                            </Grid>
-
-                            <Grid Margin="0,0,0,3">
-                                <TextBlock Text="Cluster Extents:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
-                                <TextBlock Text="{Binding DataExtents.Count, StringFormat='{}{0} runs mapped'}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
-                            </Grid>
-
+                        <!-- 1. Heuristic AI Format & Name Recommendation Banner -->
+                        <Border Grid.Row="0" Background="#1D1A33" BorderBrush="{DynamicResource SecondaryAccentBrush}" BorderThickness="1"
+                                CornerRadius="6" Padding="12,7" Margin="0,0,0,10"
+                                Visibility="{Binding SelectedFileHasSuggestion, Converter={StaticResource BoolToVisConverter}}">
                             <Grid>
-                                <TextBlock Text="MFT Resident:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
-                                <TextBlock Text="{Binding IsResident, StringFormat='{}{0}'}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
-                            </Grid>
-                        </StackPanel>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="💡 AI File Format &amp; Name Recommendation:" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource SecondaryAccentBrush}"/>
+                                        <Border Background="#2D254E" CornerRadius="4" Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding SelectedFile.DetectedFormat}" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Margin="0,3,0,0" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}">
+                                        <Run Text="Recommended Name: " Foreground="{DynamicResource TextMutedBrush}"/>
+                                        <Run Text="{Binding SelectedFile.SuggestedFileName, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <Run Text=" (Original: " Foreground="{DynamicResource TextMutedBrush}"/>
+                                        <Run Text="{Binding SelectedFile.FileName, Mode=OneWay}" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <Run Text=")" Foreground="{DynamicResource TextMutedBrush}"/>
+                                    </TextBlock>
+                                </StackPanel>
 
-                        <!-- Monospace Hex Viewer Header -->
-                        <Border Grid.Column="1" Background="{DynamicResource BgInputBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1"
-                                CornerRadius="6" Padding="10,6">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Text="HEADER SIGNATURE / SECTOR PREVIEW" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,4"/>
-                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="85">
-                                    <TextBlock Text="{Binding SelectedFilePreviewBytes, Converter={StaticResource HexDumpConverter}}"
-                                               FontFamily="{StaticResource MonospaceFont}" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                </ScrollViewer>
+                                <Button Grid.Column="1" Content="✨ Apply Suggested Name" Command="{Binding ApplySuggestedNameCommand}"
+                                        Style="{StaticResource AccentButtonStyle}" Height="28" Padding="14,0" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
+
+                        <!-- 2. Main Inspector Split: Metadata vs Dual Tab Preview -->
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="340"/> <!-- Metadata Summary -->
+                                <ColumnDefinition Width="*"/>   <!-- Dual Tabbed Viewer -->
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Candidate Metadata Details -->
+                            <StackPanel Grid.Column="0" Margin="0,0,14,0" DataContext="{Binding SelectedFile}">
+                                <TextBlock Text="CANDIDATE INSPECTOR" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}" Margin="0,0,0,6"/>
+                                
+                                <Grid Margin="0,0,0,3">
+                                    <TextBlock Text="Target File:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                    <TextBlock Text="{Binding FileName}" HorizontalAlignment="Right" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="11" TextTrimming="CharacterEllipsis" MaxWidth="220"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,3">
+                                    <TextBlock Text="Health Assessment:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                    <TextBlock Text="{Binding Health}" HorizontalAlignment="Right" Foreground="{Binding Health, Converter={StaticResource HealthBrushConverter}}" FontWeight="Bold" FontSize="11"/>
+                                </Grid>
+
+                                <TextBlock Text="{Binding Health, Converter={StaticResource HealthDescConverter}}"
+                                           FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,6"/>
+
+                                <Grid Margin="0,0,0,3">
+                                    <TextBlock Text="Method / Offset:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                    <TextBlock HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11">
+                                        <Run Text="{Binding RecoveryMethod, Mode=OneWay}"/>
+                                        <Run Text=" @ 0x"/>
+                                        <Run Text="{Binding SourceOffset, StringFormat='{}{0:X8}', Mode=OneWay}"/>
+                                    </TextBlock>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,3">
+                                    <TextBlock Text="Cluster Extents:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                    <TextBlock Text="{Binding DataExtents.Count, StringFormat='{}{0} runs mapped'}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
+                                </Grid>
+
+                                <Grid>
+                                    <TextBlock Text="MFT Resident:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                    <TextBlock Text="{Binding IsResident, StringFormat='{}{0}'}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- Dual-Tab Viewer: Formatted Content Preview & Raw Hex Dump -->
+                            <Border Grid.Column="1" Background="{DynamicResource BgInputBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1"
+                                    CornerRadius="6" Padding="10,6">
+                                <TabControl Height="135">
+                                    <!-- Tab 1: Formatted Content Preview -->
+                                    <TabItem Header="📄 Formatted Content Preview">
+                                        <Grid Margin="0,6,0,0">
+                                            <!-- When text preview is available -->
+                                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                                                          Visibility="{Binding SelectedFilePreviewText, Converter={StaticResource StringToVisConverter}}">
+                                                <TextBox Text="{Binding SelectedFilePreviewText, Mode=OneWay}"
+                                                         IsReadOnly="True" BorderThickness="0" Background="Transparent"
+                                                         Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="{StaticResource MonospaceFont}"
+                                                         FontSize="11" TextWrapping="Wrap"/>
+                                            </ScrollViewer>
+
+                                            <!-- Fallback notice when file is binary / not text -->
+                                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                        Visibility="{Binding SelectedFilePreviewText, Converter={StaticResource StringToVisConverter}, ConverterParameter=Invert}">
+                                                <TextBlock Text="🔍 Binary payload detected" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="{Binding SelectedFile.DetectedFormat, StringFormat='Format: {0}'}" FontSize="11" Foreground="{DynamicResource PrimaryAccentBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                                <TextBlock Text="Switch to 'Raw Hex &amp; Sector Dump' tab to inspect raw signature bytes." FontSize="10.5" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </TabItem>
+
+                                    <!-- Tab 2: Raw Hex & Sector Dump -->
+                                    <TabItem Header="🔢 Raw Hex &amp; Sector Dump">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0,6,0,0">
+                                            <TextBlock Text="{Binding SelectedFilePreviewBytes, Converter={StaticResource HexDumpConverter}}"
+                                                       FontFamily="{StaticResource MonospaceFont}" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        </ScrollViewer>
+                                    </TabItem>
+                                </TabControl>
+                            </Border>
+                        </Grid>
                     </Grid>
                 </Border>
             </Grid>
