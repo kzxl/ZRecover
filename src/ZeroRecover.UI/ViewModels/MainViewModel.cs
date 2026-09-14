@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using ZeroRecover.Core;
 using ZeroRecover.Core.Disk;
 using ZeroRecover.Core.Intelligence;
@@ -123,6 +125,10 @@ public class MainViewModel : INotifyPropertyChanged
                 OnPropertyChanged(nameof(SelectedFilePreviewBytes));
                 OnPropertyChanged(nameof(SelectedFilePreviewText));
                 OnPropertyChanged(nameof(SelectedFileHasSuggestion));
+                OnPropertyChanged(nameof(IsSelectedFileImage));
+                OnPropertyChanged(nameof(IsNotSelectedFileImage));
+                OnPropertyChanged(nameof(SelectedFileImageSource));
+                OnPropertyChanged(nameof(SelectedFileImageDimensions));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -132,6 +138,134 @@ public class MainViewModel : INotifyPropertyChanged
     public bool SelectedFileHasSuggestion => SelectedFile?.HasSuggestion ?? false;
     public byte[]? SelectedFilePreviewBytes => SelectedFile?.PreviewBytes ?? SelectedFile?.ResidentData;
     public string? SelectedFilePreviewText => SelectedFile?.PreviewText;
+
+    public bool IsSelectedFileImage
+    {
+        get
+        {
+            if (SelectedFile == null) return false;
+            string ext = (SelectedFile.SuggestedExtension ?? SelectedFile.Extension).ToLowerInvariant();
+            return ext is ".png" or ".jpg" or ".jpeg" or ".gif" or ".bmp" or ".webp" or ".ico";
+        }
+    }
+
+    public bool IsNotSelectedFileImage => !IsSelectedFileImage;
+
+    public ImageSource? SelectedFileImageSource
+    {
+        get
+        {
+            if (!IsSelectedFileImage || SelectedFile == null) return null;
+
+            try
+            {
+                if (!string.IsNullOrEmpty(SelectedFile.PhysicalPath) && File.Exists(SelectedFile.PhysicalPath))
+                {
+                    var bmp = new BitmapImage();
+                    bmp.BeginInit();
+                    bmp.CacheOption = BitmapCacheOption.OnLoad;
+                    bmp.UriSource = new Uri(SelectedFile.PhysicalPath);
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    return bmp;
+                }
+
+                byte[]? bytes = SelectedFile.PreviewBytes ?? SelectedFile.ResidentData;
+                if (bytes != null && bytes.Length > 32)
+                {
+                    using var ms = new MemoryStream(bytes);
+                    var bmp = new BitmapImage();
+                    bmp.BeginInit();
+                    bmp.CacheOption = BitmapCacheOption.OnLoad;
+                    bmp.StreamSource = ms;
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    return bmp;
+                }
+            }
+            catch { }
+
+            return null;
+        }
+    }
+
+    public string SelectedFileImageDimensions
+    {
+        get
+        {
+            if (SelectedFileImageSource is BitmapSource bs)
+            {
+                return $"{bs.PixelWidth} × {bs.PixelHeight} px ({bs.Format.BitsPerPixel} bpp)";
+            }
+            return IsSelectedFileImage ? "Image format detected" : string.Empty;
+        }
+    }
+
+    // Scan Scope & Targeted Scanning
+    private bool _isFolderScope;
+    public bool IsFolderScope
+    {
+        get => _isFolderScope;
+        set
+        {
+            if (_isFolderScope != value)
+            {
+                _isFolderScope = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsDriveScope));
+                if (_isFolderScope && string.IsNullOrWhiteSpace(TargetFolderPath))
+                {
+                    TargetFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                }
+                OnPropertyChanged(nameof(CanStartScan));
+            }
+        }
+    }
+
+    public bool IsDriveScope
+    {
+        get => !IsFolderScope;
+        set => IsFolderScope = !value;
+    }
+
+    private string _targetFolderPath = string.Empty;
+    public string TargetFolderPath
+    {
+        get => _targetFolderPath;
+        set
+        {
+            if (_targetFolderPath != value)
+            {
+                _targetFolderPath = value;
+                OnPropertyChanged();
+                SyncSourceDriveFromFolder();
+                OnPropertyChanged(nameof(CanStartScan));
+            }
+        }
+    }
+
+    private bool _preserveFolderStructure = true;
+    public bool PreserveFolderStructure
+    {
+        get => _preserveFolderStructure;
+        set { _preserveFolderStructure = value; OnPropertyChanged(); }
+    }
+
+    private void SyncSourceDriveFromFolder()
+    {
+        if (string.IsNullOrWhiteSpace(TargetFolderPath)) return;
+        try
+        {
+            string root = Path.GetPathRoot(TargetFolderPath) ?? string.Empty;
+            string driveLetter = root.TrimEnd('\\', '/');
+            var matchedDrive = Drives.FirstOrDefault(d => d.DriveLetter.Equals(driveLetter, StringComparison.OrdinalIgnoreCase));
+            if (matchedDrive != null && SelectedDrive != matchedDrive)
+            {
+                SelectedDrive = matchedDrive;
+            }
+        }
+        catch { }
+    }
 
     private bool _isScanning;
     public bool IsScanning
@@ -154,7 +288,7 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     public bool IsNotScanning => !IsScanning;
-    public bool CanStartScan => !IsScanning && SelectedDrive != null;
+    public bool CanStartScan => !IsScanning && SelectedDrive != null && (!IsFolderScope || !string.IsNullOrWhiteSpace(TargetFolderPath));
     public bool CanCancelScan => IsScanning;
     public bool CanRestore => !IsScanning && IsDestinationSafe && HasSelectedFiles;
     public bool ShowEmptyState => !IsScanning && AllFiles.Count == 0;
@@ -264,15 +398,56 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand DismissInfoBarCommand { get; }
     public ICommand RelaunchAsAdminCommand { get; }
     public ICommand ApplySuggestedNameCommand { get; }
+    public ICommand SetPresetScopeCommand { get; }
+    public ICommand BrowseFolderScopeCommand { get; }
 
     public MainViewModel()
     {
-        StartScanCommand = new RelayCommand(async _ => await ExecuteScanAsync(), _ => !IsScanning && SelectedDrive != null);
+        StartScanCommand = new RelayCommand(async _ => await ExecuteScanAsync(), _ => CanStartScan);
         CancelScanCommand = new RelayCommand(_ => CancelScan(), _ => IsScanning);
-        RestoreSelectedCommand = new RelayCommand(async _ => await ExecuteRestoreAsync(), _ => !IsScanning && IsDestinationSafe && HasSelectedFiles);
+        RestoreSelectedCommand = new RelayCommand(async _ => await ExecuteRestoreAsync(), _ => CanRestore);
         SelectAllCommand = new RelayCommand(_ => SetAllSelected(true));
         DeselectAllCommand = new RelayCommand(_ => SetAllSelected(false));
         RefreshDrivesCommand = new RelayCommand(_ => LoadDrives(), _ => !IsScanning);
+        SetPresetScopeCommand = new RelayCommand(param =>
+        {
+            if (param is string preset)
+            {
+                IsFolderScope = true;
+                string? path = preset.ToLowerInvariant() switch
+                {
+                    "desktop" => Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                    "downloads" => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+                    "documents" => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    _ => null
+                };
+
+                if (preset.Equals("recyclebin", StringComparison.OrdinalIgnoreCase))
+                {
+                    CurrentMode = ScanMode.RecycleBin;
+                    TargetFolderPath = Path.Combine(SelectedDrive?.DriveLetter ?? "C:", "$Recycle.Bin");
+                }
+                else if (!string.IsNullOrEmpty(path))
+                {
+                    TargetFolderPath = path;
+                }
+            }
+        });
+        BrowseFolderScopeCommand = new RelayCommand(_ =>
+        {
+            using var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            dialog.Description = "Select Specific Target Folder to Scan for Recoverable Files";
+            dialog.UseDescriptionForTitle = true;
+            if (!string.IsNullOrWhiteSpace(TargetFolderPath) && Directory.Exists(TargetFolderPath))
+            {
+                dialog.InitialDirectory = TargetFolderPath;
+            }
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                IsFolderScope = true;
+                TargetFolderPath = dialog.SelectedPath;
+            }
+        });
         ApplySuggestedNameCommand = new RelayCommand(_ =>
         {
             if (SelectedFile != null && SelectedFile.HasSuggestion)
@@ -425,8 +600,10 @@ public class MainViewModel : INotifyPropertyChanged
 
         IsScanning = true;
         ScanProgress = 0;
-        ThroughputText = string.Empty;
-        StatusText = $"Scanning {SelectedDrive.DriveLetter} ({CurrentModeTitle})...";
+        string scopeDesc = IsFolderScope && !string.IsNullOrWhiteSpace(TargetFolderPath)
+            ? $"Folder: {Path.GetFileName(TargetFolderPath)}"
+            : SelectedDrive.DriveLetter;
+        StatusText = $"Scanning {scopeDesc} ({CurrentModeTitle})...";
         AllFiles.Clear();
         DisplayFiles.Clear();
         SelectedFile = null;
@@ -438,7 +615,8 @@ public class MainViewModel : INotifyPropertyChanged
             TargetDrive = SelectedDrive.DriveLetter,
             Mode = CurrentMode,
             FilterCategory = SelectedCategory,
-            SearchQuery = SearchFilter
+            SearchQuery = SearchFilter,
+            TargetFolderPath = IsFolderScope ? TargetFolderPath : null
         };
 
         var progress = new Progress<ScanProgressReport>(report =>
@@ -525,7 +703,7 @@ public class MainViewModel : INotifyPropertyChanged
             int successCount = 0;
             foreach (var file in selected)
             {
-                await _recoveryService.RestoreFileAsync(file, DestinationPath);
+                await _recoveryService.RestoreFileAsync(file, DestinationPath, PreserveFolderStructure);
                 successCount++;
                 StatusText = $"Restored {successCount}/{selected.Count} files...";
             }

@@ -18,6 +18,17 @@ public sealed class ScanOptions
     public long? MaxFileSize { get; set; }
 
     public bool FastExitOnMatch { get; set; }
+
+    /// <summary>
+    /// Optional specific directory path to narrow scan scope (e.g. "C:\Users\User\Documents").
+    /// If null or empty, the entire volume is scanned.
+    /// </summary>
+    public string? TargetFolderPath { get; set; }
+
+    /// <summary>
+    /// True if scan is targeted to a specific folder rather than entire drive.
+    /// </summary>
+    public bool IsFolderScope => !string.IsNullOrWhiteSpace(TargetFolderPath);
 }
 
 /// <summary>

@@ -273,37 +273,45 @@ public sealed class RecoveryService
 
             // 2. Discover candidate directories to search on target drive
             var candidateDirs = new List<string>();
-            string[] knownSubDirs =
-            [
-                Path.Combine(drive, "Users"),
-                Path.Combine(drive, "Temp"),
-                Path.Combine(drive, "Tmp")
-            ];
 
-            foreach (var kd in knownSubDirs)
+            if (options.IsFolderScope && !string.IsNullOrWhiteSpace(options.TargetFolderPath) && Directory.Exists(options.TargetFolderPath))
             {
-                if (Directory.Exists(kd))
-                {
-                    candidateDirs.Add(kd);
-                }
+                candidateDirs.Add(options.TargetFolderPath);
             }
-
-            if (candidateDirs.Count == 0 || !drive.StartsWith("C:", StringComparison.OrdinalIgnoreCase))
+            else
             {
-                try
+                string[] knownSubDirs =
+                [
+                    Path.Combine(drive, "Users"),
+                    Path.Combine(drive, "Temp"),
+                    Path.Combine(drive, "Tmp")
+                ];
+
+                foreach (var kd in knownSubDirs)
                 {
-                    var rootDirs = Directory.GetDirectories(drive);
-                    foreach (var rd in rootDirs)
+                    if (Directory.Exists(kd))
                     {
-                        string dirName = Path.GetFileName(rd);
-                        if (!dirName.StartsWith("$", StringComparison.OrdinalIgnoreCase) &&
-                            !dirName.Equals("System Volume Information", StringComparison.OrdinalIgnoreCase))
-                        {
-                            candidateDirs.Add(rd);
-                        }
+                        candidateDirs.Add(kd);
                     }
                 }
-                catch { }
+
+                if (candidateDirs.Count == 0 || !drive.StartsWith("C:", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        var rootDirs = Directory.GetDirectories(drive);
+                        foreach (var rd in rootDirs)
+                        {
+                            string dirName = Path.GetFileName(rd);
+                            if (!dirName.StartsWith("$", StringComparison.OrdinalIgnoreCase) &&
+                                !dirName.Equals("System Volume Information", StringComparison.OrdinalIgnoreCase))
+                            {
+                                candidateDirs.Add(rd);
+                            }
+                        }
+                    }
+                    catch { }
+                }
             }
 
             string[] recoveryPatterns =
@@ -440,17 +448,48 @@ public sealed class RecoveryService
     /// Restores a single recoverable candidate to the destination directory.
     /// Strictly verifies the Zero-Write Safety Barrier before writing a single byte.
     /// </summary>
+    public Task<string> RestoreFileAsync(
+        RecoverableFile file,
+        string destinationDirectory,
+        RawDiskReader? optionalDiskReader = null,
+        CancellationToken cancellationToken = default)
+    {
+        return RestoreFileAsync(file, destinationDirectory, preserveFolderStructure: true, optionalDiskReader, cancellationToken);
+    }
+
     public async Task<string> RestoreFileAsync(
         RecoverableFile file,
         string destinationDirectory,
+        bool preserveFolderStructure,
         RawDiskReader? optionalDiskReader = null,
         CancellationToken cancellationToken = default)
     {
         // 1. Enforce Zero-Write Safety Barrier
         SafetyBarrier.ValidateDestination(file.SourceDrive, destinationDirectory);
 
-        Directory.CreateDirectory(destinationDirectory);
-        string targetFilePath = Path.Combine(destinationDirectory, file.FileName);
+        string targetDir = destinationDirectory;
+        if (preserveFolderStructure && !string.IsNullOrWhiteSpace(file.OriginalPath))
+        {
+            string? fileDir = Path.GetDirectoryName(file.OriginalPath);
+            if (!string.IsNullOrEmpty(fileDir))
+            {
+                string relativePath = fileDir;
+                int colonIdx = relativePath.IndexOf(':');
+                if (colonIdx >= 0)
+                {
+                    relativePath = relativePath.Substring(colonIdx + 1);
+                }
+                relativePath = relativePath.TrimStart('\\', '/');
+
+                if (!string.IsNullOrEmpty(relativePath))
+                {
+                    targetDir = Path.Combine(destinationDirectory, relativePath);
+                }
+            }
+        }
+
+        Directory.CreateDirectory(targetDir);
+        string targetFilePath = Path.Combine(targetDir, file.FileName);
 
         // Ensure unique filename if already exists
         int counter = 1;
@@ -458,7 +497,7 @@ public sealed class RecoveryService
         string ext = Path.GetExtension(file.FileName);
         while (File.Exists(targetFilePath))
         {
-            targetFilePath = Path.Combine(destinationDirectory, $"{baseName}_{counter++}{ext}");
+            targetFilePath = Path.Combine(targetDir, $"{baseName}_{counter++}{ext}");
         }
 
         // 2. Execute restoration based on candidate type
@@ -505,6 +544,16 @@ public sealed class RecoveryService
         }
 
         var query = files.AsEnumerable();
+
+        if (options.IsFolderScope && !string.IsNullOrWhiteSpace(options.TargetFolderPath))
+        {
+            string targetFolder = options.TargetFolderPath.TrimEnd('\\', '/');
+            string folderWithSlash = targetFolder + Path.DirectorySeparatorChar;
+            query = query.Where(f =>
+                !string.IsNullOrEmpty(f.OriginalPath) &&
+                (f.OriginalPath.StartsWith(folderWithSlash, StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(Path.GetDirectoryName(f.OriginalPath), targetFolder, StringComparison.OrdinalIgnoreCase)));
+        }
 
         if (options.FilterCategory != FileCategory.All)
         {
