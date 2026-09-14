@@ -6,7 +6,7 @@
         xmlns:models="clr-namespace:ZeroRecover.Core.Models;assembly=ZeroRecover.Core"
         Title="ZeroRecover — Sovereign Deep Data Recovery Suite" 
         Icon="app.ico"
-        Height="840" Width="1280" MinHeight="660" MinWidth="1020"
+        Height="850" Width="1300" MinHeight="680" MinWidth="1040"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource BgDarkBrush}"
         Foreground="{DynamicResource TextPrimaryBrush}"
@@ -18,7 +18,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="280"/> <!-- Left Control Rail -->
+            <ColumnDefinition Width="310"/> <!-- Left Control Rail with ample breathing room -->
             <ColumnDefinition Width="*"/>   <!-- Main Recovery Workspace -->
         </Grid.ColumnDefinitions>
 
@@ -31,20 +31,18 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Brand Header -->
-                    <RowDefinition Height="Auto"/> <!-- Drive Selector Card -->
-                    <RowDefinition Height="Auto"/> <!-- Volume Specs & Usage Card -->
-                    <RowDefinition Height="*"/>    <!-- Recovery Architecture Modes -->
+                    <RowDefinition Height="*"/>    <!-- Scrollable Control Cards -->
                     <RowDefinition Height="Auto"/> <!-- Sovereign Safe Barrier Status -->
                 </Grid.RowDefinitions>
 
                 <!-- Brand Header -->
-                <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                <StackPanel Grid.Row="0" Margin="0,0,0,14">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Image Source="app.png" Width="32" Height="32" Margin="0,0,10,0" VerticalAlignment="Center"
+                        <Image Source="app.png" Width="34" Height="34" Margin="0,0,10,0" VerticalAlignment="Center"
                                RenderOptions.BitmapScalingMode="HighQuality"/>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
@@ -53,146 +51,156 @@
                                     <TextBlock Text="PRO" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
                                 </Border>
                             </StackPanel>
-                            <TextBlock Text="Sovereign Deep Recovery Engine" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,0"/>
+                            <TextBlock Text="Sovereign Deep Recovery Engine" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
 
-                <!-- Source Drive Selector Card -->
-                <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Padding="12,10" Margin="0,0,0,12">
-                    <StackPanel>
-                        <Grid Margin="0,0,0,6">
-                            <TextBlock Text="SOURCE STORAGE DRIVE" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center"/>
-                            <Button Content="🔄 Refresh" Command="{Binding RefreshDrivesCommand}"
-                                    Style="{StaticResource GhostButtonStyle}" HorizontalAlignment="Right" FontSize="11" ToolTip="Rescan connected drives &amp; USB volumes"/>
-                        </Grid>
+                <!-- Scrollable Control Cards Area -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,0,4,0">
 
-                        <ComboBox ItemsSource="{Binding Drives}" SelectedItem="{Binding SelectedDrive}"
-                                  Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
-                                  BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="8,6">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="0,2">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="💾" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding DriveLetter}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                                <TextBlock Text=" (" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                                <TextBlock Text="{Binding VolumeLabel}" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                                <TextBlock Text=")" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                            </StackPanel>
-                                            <TextBlock Text="{Binding FileSystem}" FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
-                                        </StackPanel>
-                                        <TextBlock Grid.Column="2" Text="{Binding FormattedTotal}" HorizontalAlignment="Right"
-                                                   Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                        <!-- 1. Source Drive Selector Card -->
+                        <Border Style="{StaticResource CardBorderStyle}" Padding="12,10" Margin="0,0,0,12">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,6">
+                                    <TextBlock Text="SOURCE STORAGE DRIVE" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center"/>
+                                    <Button Content="🔄 Refresh" Command="{Binding RefreshDrivesCommand}"
+                                            Style="{StaticResource GhostButtonStyle}" HorizontalAlignment="Right" FontSize="11" ToolTip="Rescan connected drives &amp; USB volumes"/>
+                                </Grid>
+
+                                <ComboBox ItemsSource="{Binding Drives}" SelectedItem="{Binding SelectedDrive}"
+                                          Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                                          BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="8,6">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="💾" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding DriveLetter}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                                        <TextBlock Text=" (" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                        <TextBlock Text="{Binding VolumeLabel}" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                        <TextBlock Text=")" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding FileSystem}" FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="2" Text="{Binding FormattedTotal}" HorizontalAlignment="Right"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 2. Volume Specs & Capacity Meter Card (Zero text collision) -->
+                        <Border Style="{StaticResource CardBorderStyle}" Padding="12,10" Margin="0,0,0,12"
+                                DataContext="{Binding SelectedDrive}">
+                            <StackPanel>
+                                <!-- Title Row + Free Space Indicator -->
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Text="VOLUME CAPACITY" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
+                                    <TextBlock HorizontalAlignment="Right" FontSize="10.5" Foreground="{DynamicResource SuccessAccentBrush}" FontWeight="SemiBold">
+                                        <Run Text="{Binding FormattedFree, Mode=OneWay}"/>
+                                        <Run Text=" Free"/>
+                                    </TextBlock>
+                                </Grid>
+
+                                <!-- Capacity Usage Progress Bar -->
+                                <ProgressBar Value="{Binding Mode=OneWay, Converter={StaticResource DriveUsageConverter}}" Maximum="100" Height="6"
+                                             Foreground="{DynamicResource PrimaryAccentBrush}" Background="{DynamicResource BgInputBrush}"
+                                             BorderThickness="0" Margin="0,2,0,4"/>
+
+                                <!-- Total Size Subtitle -->
+                                <TextBlock HorizontalAlignment="Right" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,8">
+                                    <Run Text="Total Storage: "/>
+                                    <Run Text="{Binding FormattedTotal, Mode=OneWay}"/>
+                                </TextBlock>
+
+                                <!-- Hardware & Filesystem Details -->
+                                <Grid Margin="0,0,0,3">
+                                    <TextBlock Text="File System:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                    <TextBlock Text="{Binding FileSystem}" HorizontalAlignment="Right" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,3">
+                                    <TextBlock Text="Cluster Size:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                    <TextBlock Text="{Binding ClusterSize, StringFormat='{}{0} Bytes'}" HorizontalAlignment="Right" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="11"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,3">
+                                    <TextBlock Text="Sectors/Cluster:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                    <TextBlock Text="{Binding SectorsPerCluster}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
+                                </Grid>
+                                <Grid>
+                                    <TextBlock Text="Raw Device:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                    <TextBlock Text="{Binding DevicePath}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 3. Recovery Architecture Modes -->
+                        <StackPanel Margin="0,0,0,4">
+                            <TextBlock Text="RECOVERY ARCHITECTURE" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,8"/>
+
+                            <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                         IsChecked="True" Click="QuickUndelete_Click">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🔍" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Quick Undelete" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    </StackPanel>
+                                    <TextBlock Text="Scans NTFS $MFT &amp; FAT tables for recently deleted files."
+                                               FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="22,2,0,0"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                         Click="DeepCarve_Click">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🧬" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Deep Raw Carving" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    </StackPanel>
+                                    <TextBlock Text="Sector-by-sector signature carving across unallocated disk space."
+                                               FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="22,2,0,0"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                         Click="Vss_Click">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🛡️" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Shadow Explorer" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    </StackPanel>
+                                    <TextBlock Text="Mounts historical Windows VSS shadow copies for deleted files."
+                                               FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="22,2,0,0"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                         Click="Recycle_Click">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🗑️" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Recycle Rescue" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    </StackPanel>
+                                    <TextBlock Text="Decodes INFO2 / $I records to restore emptied Recycle Bin items."
+                                               FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="22,2,0,0"/>
+                                </StackPanel>
+                            </RadioButton>
+                        </StackPanel>
                     </StackPanel>
-                </Border>
+                </ScrollViewer>
 
-                <!-- Volume Specs & Capacity Meter Card -->
-                <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}" Padding="12,10" Margin="0,0,0,14"
-                        DataContext="{Binding SelectedDrive}">
-                    <StackPanel>
-                        <Grid Margin="0,0,0,6">
-                            <TextBlock Text="VOLUME CAPACITY" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
-                            <TextBlock HorizontalAlignment="Right" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}">
-                                <Run Text="{Binding FormattedFree, Mode=OneWay}"/>
-                                <Run Text=" free of "/>
-                                <Run Text="{Binding FormattedTotal, Mode=OneWay}"/>
-                            </TextBlock>
-                        </Grid>
-
-                        <!-- Capacity Usage Meter -->
-                        <Grid Margin="0,2,0,8">
-                            <ProgressBar Value="{Binding Mode=OneWay, Converter={StaticResource DriveUsageConverter}}" Maximum="100" Height="6"
-                                         Foreground="{DynamicResource PrimaryAccentBrush}" Background="{DynamicResource BgInputBrush}"
-                                         BorderThickness="0"/>
-                        </Grid>
-
-                        <!-- Hardware & Filesystem Details -->
-                        <Grid Margin="0,0,0,4">
-                            <TextBlock Text="File System:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
-                            <TextBlock Text="{Binding FileSystem}" HorizontalAlignment="Right" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="11"/>
-                        </Grid>
-                        <Grid Margin="0,0,0,4">
-                            <TextBlock Text="Cluster Size:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
-                            <TextBlock Text="{Binding ClusterSize, StringFormat='{}{0} Bytes'}" HorizontalAlignment="Right" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="11"/>
-                        </Grid>
-                        <Grid Margin="0,0,0,4">
-                            <TextBlock Text="Sectors/Cluster:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
-                            <TextBlock Text="{Binding SectorsPerCluster}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
-                        </Grid>
-                        <Grid>
-                            <TextBlock Text="Raw Path:" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
-                            <TextBlock Text="{Binding DevicePath}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <!-- Recovery Architecture Modes -->
-                <StackPanel Grid.Row="3">
-                    <TextBlock Text="RECOVERY ARCHITECTURE" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,8"/>
-
-                    <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
-                                 IsChecked="True" Click="QuickUndelete_Click">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="🔍" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Quick Undelete" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            </StackPanel>
-                            <TextBlock Text="Scans NTFS $MFT &amp; FAT directory tables for recently purged records."
-                                       FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="20,2,0,0"/>
-                        </StackPanel>
-                    </RadioButton>
-
-                    <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
-                                 Click="DeepCarve_Click">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="🧬" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Deep Raw Carving" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            </StackPanel>
-                            <TextBlock Text="Byte-level signature carving across unallocated disk clusters."
-                                       FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="20,2,0,0"/>
-                        </StackPanel>
-                    </RadioButton>
-
-                    <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
-                                 Click="Vss_Click">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="🛡️" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Shadow Explorer" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            </StackPanel>
-                            <TextBlock Text="Mounts historical Windows VSS shadow copies for deleted files."
-                                       FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="20,2,0,0"/>
-                        </StackPanel>
-                    </RadioButton>
-
-                    <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
-                                 Click="Recycle_Click">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="🗑️" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Recycle Rescue" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            </StackPanel>
-                            <TextBlock Text="Decodes INFO2 / $I records to restore emptied Recycle Bin items."
-                                       FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="20,2,0,0"/>
-                        </StackPanel>
-                    </RadioButton>
-                </StackPanel>
-
-                <!-- Sovereign Safe Barrier Status -->
-                <Border Grid.Row="4" Background="#14192A" BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="1"
-                        CornerRadius="6" Padding="10,8" Margin="0,10,0,0">
+                <!-- Safe Barrier Status Footer -->
+                <Border Grid.Row="2" Background="#14192A" BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="1"
+                        CornerRadius="6" Padding="10,8" Margin="0,8,0,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="●" Foreground="{DynamicResource SuccessAccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Text="Zero-Write Safe Barrier Active" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
@@ -265,56 +273,95 @@
                 </Grid>
             </Border>
 
-            <!-- 4. Category Filter Chips & Search Toolstrip -->
+            <!-- 4. Category Filter Chips & Search Toolstrip (2-Tier Non-Colliding Layout) -->
             <Border Grid.Row="3" Margin="0,0,0,10">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/> <!-- Category Filter Chips -->
-                        <ColumnDefinition Width="*"/>    <!-- Search Input -->
-                        <ColumnDefinition Width="Auto"/> <!-- Selection Tools -->
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/> <!-- Row 0: Category Filter Chips -->
+                        <RowDefinition Height="Auto"/> <!-- Row 1: Search Box & Selection Buttons -->
+                    </Grid.RowDefinitions>
 
-                    <!-- Category Filter Chips -->
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <RadioButton Content="{Binding CountAll, StringFormat='All ({0})'}" GroupName="CategoryFilter"
-                                     IsChecked="True" Style="{StaticResource CategoryChipStyle}"
-                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.All}"/>
+                    <!-- Row 0: Category Filter Chips with Icon + Name + Live Count -->
+                    <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,8">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <RadioButton GroupName="CategoryFilter" IsChecked="True" Style="{StaticResource CategoryChipStyle}"
+                                         Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.All}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗂️ All ("/>
+                                    <TextBlock Text="{Binding CountAll, Mode=OneWay}"/>
+                                    <TextBlock Text=")"/>
+                                </StackPanel>
+                            </RadioButton>
 
-                        <RadioButton Content="{Binding CountDocuments, StringFormat='📄 Documents ({0})'}" GroupName="CategoryFilter"
-                                     Style="{StaticResource CategoryChipStyle}"
-                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Documents}"/>
+                            <RadioButton GroupName="CategoryFilter" Style="{StaticResource CategoryChipStyle}"
+                                         Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Documents}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📄 Documents ("/>
+                                    <TextBlock Text="{Binding CountDocuments, Mode=OneWay}"/>
+                                    <TextBlock Text=")"/>
+                                </StackPanel>
+                            </RadioButton>
 
-                        <RadioButton Content="{Binding CountPictures, StringFormat='🖼️ Photos ({0})'}" GroupName="CategoryFilter"
-                                     Style="{StaticResource CategoryChipStyle}"
-                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Pictures}"/>
+                            <RadioButton GroupName="CategoryFilter" Style="{StaticResource CategoryChipStyle}"
+                                         Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Pictures}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🖼️ Photos ("/>
+                                    <TextBlock Text="{Binding CountPictures, Mode=OneWay}"/>
+                                    <TextBlock Text=")"/>
+                                </StackPanel>
+                            </RadioButton>
 
-                        <RadioButton Content="{Binding CountMedia, StringFormat='🎬 Media ({0})'}" GroupName="CategoryFilter"
-                                     Style="{StaticResource CategoryChipStyle}"
-                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Videos}"/>
+                            <RadioButton GroupName="CategoryFilter" Style="{StaticResource CategoryChipStyle}"
+                                         Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Videos}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🎬 Media ("/>
+                                    <TextBlock Text="{Binding CountMedia, Mode=OneWay}"/>
+                                    <TextBlock Text=")"/>
+                                </StackPanel>
+                            </RadioButton>
 
-                        <RadioButton Content="{Binding CountArchives, StringFormat='📦 Archives ({0})'}" GroupName="CategoryFilter"
-                                     Style="{StaticResource CategoryChipStyle}"
-                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Archives}"/>
+                            <RadioButton GroupName="CategoryFilter" Style="{StaticResource CategoryChipStyle}"
+                                         Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Archives}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📦 Archives ("/>
+                                    <TextBlock Text="{Binding CountArchives, Mode=OneWay}"/>
+                                    <TextBlock Text=")"/>
+                                </StackPanel>
+                            </RadioButton>
 
-                        <RadioButton Content="{Binding CountOthers, StringFormat='📁 Others ({0})'}" GroupName="CategoryFilter"
-                                     Style="{StaticResource CategoryChipStyle}"
-                                     Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Other}"/>
-                    </StackPanel>
+                            <RadioButton GroupName="CategoryFilter" Style="{StaticResource CategoryChipStyle}"
+                                         Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.Other}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📁 Others ("/>
+                                    <TextBlock Text="{Binding CountOthers, Mode=OneWay}"/>
+                                    <TextBlock Text=")"/>
+                                </StackPanel>
+                            </RadioButton>
+                        </StackPanel>
+                    </ScrollViewer>
 
-                    <!-- Search Filter Box -->
-                    <TextBox Grid.Column="1" Text="{Binding SearchFilter, UpdateSourceTrigger=PropertyChanged}"
-                             Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
-                             BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="10,5" Margin="8,0"
-                             VerticalAlignment="Center" Height="28"
-                             ToolTip="Filter results by filename or extension..."/>
+                    <!-- Row 1: Search Filter Box & Selection Buttons -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Selection Utility Buttons -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Content="Select All" Command="{Binding SelectAllCommand}" 
-                                Style="{StaticResource SecondaryButtonStyle}" Height="28" Padding="10,0" Margin="0,0,6,0"/>
-                        <Button Content="Deselect All" Command="{Binding DeselectAllCommand}" 
-                                Style="{StaticResource SecondaryButtonStyle}" Height="28" Padding="10,0"/>
-                    </StackPanel>
+                        <!-- Search Filter Box -->
+                        <TextBox Grid.Column="0" Text="{Binding SearchFilter, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                                 BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="10,6" Margin="0,0,10,0"
+                                 VerticalContentAlignment="Center" Height="30"
+                                 ToolTip="Filter results by filename or extension..."/>
+
+                        <!-- Selection Utility Buttons -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="Select All" Command="{Binding SelectAllCommand}" 
+                                    Style="{StaticResource SecondaryButtonStyle}" Height="30" Padding="12,0" Margin="0,0,6,0"/>
+                            <Button Content="Deselect All" Command="{Binding DeselectAllCommand}" 
+                                    Style="{StaticResource SecondaryButtonStyle}" Height="30" Padding="12,0"/>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Border>
 
@@ -364,11 +411,12 @@
                             </GridViewColumn>
 
                             <!-- Formatted Size (Numeric Right-Alignment per standards) -->
-                            <GridViewColumn Header="Size" Width="95">
+                            <GridViewColumn Header="Size" Width="100">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding FormattedSize}" FontFamily="{StaticResource MonospaceFont}"
-                                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                   TextAlignment="Right" HorizontalAlignment="Stretch"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -453,7 +501,7 @@
                 </Border>
             </Grid>
 
-            <!-- 6. Bottom Restoration & Safety Barrier Bar -->
+            <!-- 6. Bottom Restoration & Safety Barrier Bar (Clean Flexible Grid) -->
             <Border Grid.Row="5" Style="{StaticResource CardBorderStyle}" Padding="14,10">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -462,39 +510,45 @@
                     </Grid.RowDefinitions>
 
                     <!-- Zero-Write Safety Alert Banner -->
-                    <Border Grid.Row="0" Margin="0,0,0,10" Padding="10,6" CornerRadius="6"
-                            Background="{Binding IsDestinationSafe, Converter={StaticResource SafetyBgConverter}}"
-                            BorderBrush="{Binding IsDestinationSafe, Converter={StaticResource SafetyBorderConverter}}"
+                    <Border Grid.Row="0" Margin="0,0,0,10" Padding="12,7" CornerRadius="6"
+                            Background="{Binding IsDestinationSafe, Mode=OneWay, Converter={StaticResource SafetyBgConverter}}"
+                            BorderBrush="{Binding IsDestinationSafe, Mode=OneWay, Converter={StaticResource SafetyBorderConverter}}"
                             BorderThickness="1">
-                        <TextBlock Text="{Binding SafetyMessage}" FontSize="11.5" FontWeight="SemiBold"
-                                   Foreground="{Binding IsDestinationSafe, Converter={StaticResource SafetyBrushConverter}}"/>
+                        <TextBlock Text="{Binding SafetyMessage}" FontSize="11.5" FontWeight="SemiBold" TextWrapping="Wrap"
+                                   Foreground="{Binding IsDestinationSafe, Mode=OneWay, Converter={StaticResource SafetyBrushConverter}}"/>
                     </Border>
 
                     <!-- Destination Path & Primary Restore CTA -->
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/> <!-- Label -->
+                            <ColumnDefinition Width="*"/>    <!-- Stretchy TextBox -->
+                            <ColumnDefinition Width="Auto"/> <!-- Buttons -->
+                            <ColumnDefinition Width="Auto"/> <!-- CTA Restore -->
                         </Grid.ColumnDefinitions>
 
-                        <!-- Destination Folder Inputs -->
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="Recovery Destination:" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Margin="0,0,10,0"/>
-                            <TextBox Text="{Binding DestinationPath, UpdateSourceTrigger=PropertyChanged}"
-                                     Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
-                                     BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="8,5" Width="380"
-                                     VerticalAlignment="Center" Height="30"/>
+                        <!-- Label -->
+                        <TextBlock Grid.Column="0" Text="Recovery Destination:" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Margin="0,0,10,0"/>
+
+                        <!-- Stretchy Destination Input -->
+                        <TextBox Grid.Column="1" Text="{Binding DestinationPath, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                                 BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="10,4"
+                                 VerticalContentAlignment="Center" Height="32" Margin="0,0,8,0"/>
+
+                        <!-- Browse & Open Action Buttons -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
                             <Button Content="Browse..." Click="BrowseDestination_Click"
-                                    Style="{StaticResource SecondaryButtonStyle}" Height="30" Padding="12,0" Margin="6,0,0,0"/>
+                                    Style="{StaticResource SecondaryButtonStyle}" Height="32" Padding="14,0" Margin="0,0,6,0"/>
                             <Button Content="📁 Open Folder" Command="{Binding OpenDestinationCommand}"
-                                    Style="{StaticResource GhostButtonStyle}" Height="30" Padding="8,0" Margin="4,0,0,0"
-                                    ToolTip="Open restored destination in Windows Explorer"/>
+                                    Style="{StaticResource GhostButtonStyle}" Height="32" Padding="10,0"
+                                    ToolTip="Open recovery destination in Windows Explorer"/>
                         </StackPanel>
 
                         <!-- Primary Restore CTA Button -->
-                        <Button Grid.Column="1" Content="{Binding RestoreButtonText}"
+                        <Button Grid.Column="3" Content="{Binding RestoreButtonText}"
                                 Command="{Binding RestoreSelectedCommand}"
-                                Style="{StaticResource AccentButtonStyle}" Height="36" Padding="22,0" FontSize="13"/>
+                                Style="{StaticResource AccentButtonStyle}" Height="36" Padding="20,0" FontSize="12.5"/>
                     </Grid>
                 </Grid>
             </Border>
