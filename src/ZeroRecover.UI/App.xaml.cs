@@ -11,7 +11,8 @@ public partial class App : Application
     {
         DispatcherUnhandledException += (s, e) =>
         {
-            MessageBox.Show($"Application error: {e.Exception.Message}", "ZeroRecover Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            try { System.IO.File.WriteAllText("crash.log", e.Exception.ToString()); } catch { }
+            MessageBox.Show($"Application error: {e.Exception}", "ZeroRecover Error", MessageBoxButton.OK, MessageBoxImage.Error);
             e.Handled = true;
         };
     }
@@ -39,15 +40,24 @@ public partial class App : Application
 
         base.OnStartup(e);
 
-        var window = new MainWindow();
-        MainWindow = window;
-        window.Show();
-        if (window.WindowState == WindowState.Minimized)
+        try
         {
-            window.WindowState = WindowState.Normal;
+            var window = new MainWindow();
+            MainWindow = window;
+            window.Show();
+            if (window.WindowState == WindowState.Minimized)
+            {
+                window.WindowState = WindowState.Normal;
+            }
+            window.Activate();
+            window.Focus();
         }
-        window.Activate();
-        window.Focus();
+        catch (Exception ex)
+        {
+            try { System.IO.File.WriteAllText("crash.log", ex.ToString()); } catch { }
+            MessageBox.Show($"Window initialization error: {ex}", "ZeroRecover Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(1);
+        }
     }
 
     private void SyncZeroUiTokens()

@@ -112,7 +112,7 @@
 
                         <!-- Capacity Usage Meter -->
                         <Grid Margin="0,2,0,8">
-                            <ProgressBar Value="{Binding Converter={StaticResource DriveUsageConverter}}" Maximum="100" Height="6"
+                            <ProgressBar Value="{Binding Mode=OneWay, Converter={StaticResource DriveUsageConverter}}" Maximum="100" Height="6"
                                          Foreground="{DynamicResource PrimaryAccentBrush}" Background="{DynamicResource BgInputBrush}"
                                          BorderThickness="0"/>
                         </Grid>
@@ -259,7 +259,7 @@
                         <TextBlock Text="{Binding StatusText}" FontSize="11.5" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding ThroughputText}" HorizontalAlignment="Right" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
                     </Grid>
-                    <ProgressBar Grid.Row="1" Value="{Binding ScanProgress}" Maximum="100" Height="6"
+                    <ProgressBar Grid.Row="1" Value="{Binding ScanProgress, Mode=OneWay}" Maximum="100" Height="6"
                                  Foreground="{DynamicResource PrimaryAccentBrush}" Background="{DynamicResource BgInputBrush}"
                                  BorderThickness="0"/>
                 </Grid>
