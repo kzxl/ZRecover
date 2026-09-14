@@ -59,6 +59,9 @@ public sealed class RawDiskReader : IDisposable
     public RawDiskReader(string devicePath, int sectorSize = 512)
     {
         _sectorSize = sectorSize > 0 ? sectorSize : 512;
+        ZeroSystem.ProcessGuard.TryEnablePrivilege("SeBackupPrivilege");
+        ZeroSystem.ProcessGuard.TryEnablePrivilege("SeRestorePrivilege");
+
         _handle = CreateFile(
             devicePath,
             GENERIC_READ,

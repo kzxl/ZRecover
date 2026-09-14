@@ -12,4 +12,9 @@
   <ItemGroup>
     <ProjectReference Include="..\ZeroRecover.Core\ZeroRecover.Core.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ZeroUI.Wpf" Version="1.5.0" />
+    <PackageReference Include="ZeroSystem.Core" Version="1.0.0" />
+  </ItemGroup>
 </Project>

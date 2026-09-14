@@ -79,7 +79,7 @@ public static class VssSnapshotExplorer
             return snapshot.MountedDriveLetter;
 
         string targetDevice = snapshot.DeviceObject.TrimEnd('\\');
-        if (DosDeviceHelper.TryMountDevice(targetDevice, out char driveLetter, out string err))
+        if (ZeroSystem.DosDeviceManager.TryMountDevice(targetDevice, out char driveLetter, out string err))
         {
             snapshot.MountedDriveLetter = $"{driveLetter}:";
             return snapshot.MountedDriveLetter;
@@ -89,14 +89,14 @@ public static class VssSnapshotExplorer
     }
 
     /// <summary>
-    /// Unmounts a previously mounted VSS Snapshot.
+    /// Unmounts a previously mounted VSS Snapshot using ZeroSystem.DosDeviceManager.
     /// </summary>
     public static void UnmountSnapshot(VssSnapshotInfo snapshot)
     {
         if (snapshot.IsMounted && snapshot.MountedDriveLetter.Length > 0)
         {
             char driveChar = snapshot.MountedDriveLetter[0];
-            DosDeviceHelper.TryUnmountDevice(driveChar, snapshot.DeviceObject, out _);
+            ZeroSystem.DosDeviceManager.TryUnmountDevice(driveChar, snapshot.DeviceObject, out _);
             snapshot.MountedDriveLetter = string.Empty;
         }
     }
