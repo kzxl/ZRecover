@@ -1,6 +1,5 @@
 using System.Management;
 using ZeroRecover.Core.Models;
-using ZeroSystem;
 
 namespace ZeroRecover.Core.Vss;
 
@@ -80,7 +79,7 @@ public static class VssSnapshotExplorer
             return snapshot.MountedDriveLetter;
 
         string targetDevice = snapshot.DeviceObject.TrimEnd('\\');
-        if (DosDeviceManager.TryMountDevice(targetDevice, out char driveLetter, out string err))
+        if (DosDeviceHelper.TryMountDevice(targetDevice, out char driveLetter, out string err))
         {
             snapshot.MountedDriveLetter = $"{driveLetter}:";
             return snapshot.MountedDriveLetter;
@@ -97,7 +96,7 @@ public static class VssSnapshotExplorer
         if (snapshot.IsMounted && snapshot.MountedDriveLetter.Length > 0)
         {
             char driveChar = snapshot.MountedDriveLetter[0];
-            DosDeviceManager.TryUnmountDevice(driveChar, snapshot.DeviceObject, out _);
+            DosDeviceHelper.TryUnmountDevice(driveChar, snapshot.DeviceObject, out _);
             snapshot.MountedDriveLetter = string.Empty;
         }
     }

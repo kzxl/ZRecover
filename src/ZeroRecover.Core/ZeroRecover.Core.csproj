@@ -10,6 +10,5 @@
 
   <ItemGroup>
     <PackageReference Include="System.Management" Version="8.0.0" />
-    <PackageReference Include="ZeroSystem.Core" Version="1.0.0" />
   </ItemGroup>
 </Project>
