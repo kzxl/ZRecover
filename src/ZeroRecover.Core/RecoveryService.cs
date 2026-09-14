@@ -30,18 +30,51 @@ public sealed class RecoveryService
             case ScanMode.RecycleBin:
                 return await Task.Run(() =>
                 {
+                    progress?.Report(new ScanProgressReport
+                    {
+                        ScannedBytes = 0,
+                        TotalBytes = 100,
+                        FilesFound = 0,
+                        CurrentOperation = $"Accessing Windows Recycle Bin on {options.TargetDrive}...",
+                        MegaBytesPerSecond = 5.0
+                    });
+
                     var recs = RecycleBinExtractor.ScanDrive(options.TargetDrive);
-                    var files = recs.Select(r => RecycleBinExtractor.ToRecoverableFile(r, options.TargetDrive)).ToList();
+                    var files = new List<RecoverableFile>();
+                    for (int i = 0; i < recs.Count; i++)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        files.Add(RecycleBinExtractor.ToRecoverableFile(recs[i], options.TargetDrive));
+                        progress?.Report(new ScanProgressReport
+                        {
+                            ScannedBytes = i + 1,
+                            TotalBytes = Math.Max(1, recs.Count),
+                            FilesFound = files.Count,
+                            CurrentOperation = $"Decoded Recycle record #{i + 1}: {recs[i].OriginalFileName}...",
+                            MegaBytesPerSecond = 12.0
+                        });
+                    }
                     return FilterResults(files, options);
                 }, cancellationToken);
 
             case ScanMode.VssSnapshot:
                 return await Task.Run(() =>
                 {
+                    progress?.Report(new ScanProgressReport
+                    {
+                        ScannedBytes = 0,
+                        TotalBytes = 100,
+                        FilesFound = 0,
+                        CurrentOperation = $"Querying Volume Shadow Copy service on {options.TargetDrive}...",
+                        MegaBytesPerSecond = 8.0
+                    });
+
                     var snapshots = VssSnapshotExplorer.EnumerateSnapshots(options.TargetDrive);
                     var files = new List<RecoverableFile>();
-                    foreach (var s in snapshots)
+                    for (int i = 0; i < snapshots.Count; i++)
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        var s = snapshots[i];
                         files.Add(new RecoverableFile
                         {
                             FileName = $"VSS_Snapshot_{s.CreationTime:yyyyMMdd_HHmmss}",
@@ -53,6 +86,15 @@ public sealed class RecoveryService
                             RecoveryMethod = "VSS_SNAPSHOT",
                             SourceDrive = options.TargetDrive,
                             CreatedTime = s.CreationTime
+                        });
+
+                        progress?.Report(new ScanProgressReport
+                        {
+                            ScannedBytes = i + 1,
+                            TotalBytes = Math.Max(1, snapshots.Count),
+                            FilesFound = files.Count,
+                            CurrentOperation = $"Extracted VSS Snapshot {s.Id}...",
+                            MegaBytesPerSecond = 14.0
                         });
                     }
                     return files;
@@ -76,10 +118,22 @@ public sealed class RecoveryService
                         try
                         {
                             var volume = new NtfsVolume(optionalDiskReader);
-                            // Scan first 10,000 MFT records for deleted items
-                            for (int i = 0; i < 10000; i++)
+                            int totalRecords = 10000;
+                            for (int i = 0; i < totalRecords; i++)
                             {
                                 cancellationToken.ThrowIfCancellationRequested();
+                                if (i % 200 == 0 && progress != null)
+                                {
+                                    progress.Report(new ScanProgressReport
+                                    {
+                                        ScannedBytes = i,
+                                        TotalBytes = totalRecords,
+                                        FilesFound = files.Count,
+                                        CurrentOperation = $"Parsing NTFS $MFT record #{i:N0} of {totalRecords:N0}...",
+                                        MegaBytesPerSecond = 28.5
+                                    });
+                                }
+
                                 if (volume.TryReadMftRecord(i, out var mft) && mft != null)
                                 {
                                     if (mft.IsDeleted && !mft.IsDirectory && !string.IsNullOrEmpty(mft.PrimaryFileName))

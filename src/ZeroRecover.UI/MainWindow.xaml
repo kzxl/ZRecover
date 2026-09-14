@@ -18,7 +18,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="310"/> <!-- Left Control Rail with ample breathing room -->
+            <ColumnDefinition Width="310"/> <!-- Left Control Rail -->
             <ColumnDefinition Width="*"/>   <!-- Main Recovery Workspace -->
         </Grid.ColumnDefinitions>
 
@@ -56,20 +56,22 @@
                     </Grid>
                 </StackPanel>
 
-                <!-- Scrollable Control Cards Area -->
+                <!-- Scrollable Control Cards Area (Locked during scan) -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="0,0,4,0">
 
-                        <!-- 1. Source Drive Selector Card -->
+                        <!-- 1. Source Drive Selector Card (Locked during scan) -->
                         <Border Style="{StaticResource CardBorderStyle}" Padding="12,10" Margin="0,0,0,12">
                             <StackPanel>
                                 <Grid Margin="0,0,0,6">
                                     <TextBlock Text="SOURCE STORAGE DRIVE" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center"/>
                                     <Button Content="🔄 Refresh" Command="{Binding RefreshDrivesCommand}"
+                                            IsEnabled="{Binding IsNotScanning}"
                                             Style="{StaticResource GhostButtonStyle}" HorizontalAlignment="Right" FontSize="11" ToolTip="Rescan connected drives &amp; USB volumes"/>
                                 </Grid>
 
                                 <ComboBox ItemsSource="{Binding Drives}" SelectedItem="{Binding SelectedDrive}"
+                                          IsEnabled="{Binding IsNotScanning}"
                                           Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
                                           BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="8,6">
                                     <ComboBox.ItemTemplate>
@@ -99,7 +101,7 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- 2. Volume Specs & Capacity Meter Card (Zero text collision) -->
+                        <!-- 2. Volume Specs & Capacity Meter Card -->
                         <Border Style="{StaticResource CardBorderStyle}" Padding="12,10" Margin="0,0,0,12"
                                 DataContext="{Binding SelectedDrive}">
                             <StackPanel>
@@ -143,11 +145,12 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- 3. Recovery Architecture Modes -->
+                        <!-- 3. Recovery Architecture Modes (Locked during scan) -->
                         <StackPanel Margin="0,0,0,4">
                             <TextBlock Text="RECOVERY ARCHITECTURE" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,8"/>
 
                             <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                         IsEnabled="{Binding IsNotScanning}"
                                          IsChecked="True" Click="QuickUndelete_Click">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal">
@@ -160,6 +163,7 @@
                             </RadioButton>
 
                             <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                         IsEnabled="{Binding IsNotScanning}"
                                          Click="DeepCarve_Click">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal">
@@ -172,6 +176,7 @@
                             </RadioButton>
 
                             <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                         IsEnabled="{Binding IsNotScanning}"
                                          Click="Vss_Click">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal">
@@ -184,6 +189,7 @@
                             </RadioButton>
 
                             <RadioButton Style="{StaticResource ModeCardRadioButtonStyle}" GroupName="RecoveryMode"
+                                         IsEnabled="{Binding IsNotScanning}"
                                          Click="Recycle_Click">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal">
@@ -218,7 +224,7 @@
                 <RowDefinition Height="Auto"/> <!-- In-Window Notification InfoBar -->
                 <RowDefinition Height="Auto"/> <!-- Scan Progress & Telemetry Card -->
                 <RowDefinition Height="Auto"/> <!-- Category Chips & Search Toolstrip -->
-                <RowDefinition Height="*"/>    <!-- File Candidates Grid + File Inspector -->
+                <RowDefinition Height="*"/>    <!-- File Candidates Grid + Loading Overlay -->
                 <RowDefinition Height="Auto"/> <!-- Bottom Restoration & Safety Barrier Bar -->
             </Grid.RowDefinitions>
 
@@ -240,12 +246,16 @@
                         <TextBlock Text="{Binding CurrentModeDescription}" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0"/>
                     </StackPanel>
 
-                    <!-- Scan Action CTA Buttons -->
+                    <!-- Scan Action CTA Buttons (Morphing Start <-> Cancel) -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Start Scan Button: Visible when idle -->
                         <Button Content="⚡ Start Scan" Command="{Binding StartScanCommand}"
-                                Style="{StaticResource AccentButtonStyle}" Height="32" Padding="18,0" Margin="0,0,8,0"/>
-                        <Button Content="✕ Cancel Scan" Command="{Binding CancelScanCommand}"
-                                Style="{StaticResource DangerButtonStyle}" Height="32" Padding="14,0"
+                                Style="{StaticResource AccentButtonStyle}" Height="34" Padding="20,0"
+                                Visibility="{Binding IsNotScanning, Converter={StaticResource BoolToVisConverter}}"/>
+
+                        <!-- Cancel Scan Button: High visibility when scanning -->
+                        <Button Content="🛑 Stop / Cancel Scan" Command="{Binding CancelScanCommand}"
+                                Style="{StaticResource DangerButtonStyle}" Height="34" Padding="18,0"
                                 Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisConverter}}"/>
                     </StackPanel>
                 </Grid>
@@ -255,25 +265,43 @@
             <components:InfoBar Grid.Row="1"
                                 Visibility="{Binding IsInfoBarVisible, Converter={StaticResource BoolToVisConverter}}"/>
 
-            <!-- 3. Live Scan Progress & Telemetry Card -->
-            <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,10" Padding="12,10"
+            <!-- 3. Live Scan Progress & Telemetry Card (Active while scanning) -->
+            <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,10" Padding="14,10"
+                    Background="#181D33" BorderBrush="{DynamicResource PrimaryAccentBrush}"
                     Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisConverter}}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Grid Margin="0,0,0,6">
-                        <TextBlock Text="{Binding StatusText}" FontSize="11.5" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{Binding ThroughputText}" HorizontalAlignment="Right" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
+                    
+                    <!-- Status Header + Throughput + Quick Cancel -->
+                    <Grid Grid.Row="0" Margin="0,0,0,8">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="⚡ SCANNING: " FontSize="11" FontWeight="Bold" Foreground="{DynamicResource PrimaryAccentBrush}"/>
+                            <TextBlock Text="{Binding StatusText}" FontSize="11.5" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="520"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ThroughputText}" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource SuccessAccentBrush}" Margin="0,0,14,0"/>
+                            <Button Content="✕ Cancel" Command="{Binding CancelScanCommand}"
+                                    Style="{StaticResource DangerButtonStyle}" Height="24" Padding="10,0" FontSize="11"/>
+                        </StackPanel>
                     </Grid>
-                    <ProgressBar Grid.Row="1" Value="{Binding ScanProgress, Mode=OneWay}" Maximum="100" Height="6"
+
+                    <!-- Determinate Progress Bar -->
+                    <ProgressBar Grid.Row="1" Value="{Binding ScanProgress, Mode=OneWay}" Maximum="100" Height="8"
                                  Foreground="{DynamicResource PrimaryAccentBrush}" Background="{DynamicResource BgInputBrush}"
                                  BorderThickness="0"/>
+
+                    <!-- Indeterminate Animated Glow Pulse -->
+                    <ProgressBar Grid.Row="2" IsIndeterminate="True" Height="2" Margin="0,2,0,0"
+                                 Foreground="{DynamicResource SecondaryAccentBrush}" Background="Transparent"
+                                 BorderThickness="0" Opacity="0.75"/>
                 </Grid>
             </Border>
 
-            <!-- 4. Category Filter Chips & Search Toolstrip (2-Tier Non-Colliding Layout) -->
+            <!-- 4. Category Filter Chips & Search Toolstrip (Locked during scan) -->
             <Border Grid.Row="3" Margin="0,0,0,10">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -282,7 +310,8 @@
                     </Grid.RowDefinitions>
 
                     <!-- Row 0: Category Filter Chips with Icon + Name + Live Count -->
-                    <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,8">
+                    <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                                  IsEnabled="{Binding IsNotScanning}" Margin="0,0,0,8">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <RadioButton GroupName="CategoryFilter" IsChecked="True" Style="{StaticResource CategoryChipStyle}"
                                          Command="{Binding SetCategoryCommand}" CommandParameter="{x:Static models:FileCategory.All}">
@@ -349,6 +378,7 @@
 
                         <!-- Search Filter Box -->
                         <TextBox Grid.Column="0" Text="{Binding SearchFilter, UpdateSourceTrigger=PropertyChanged}"
+                                 IsEnabled="{Binding IsNotScanning}"
                                  Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
                                  BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="10,6" Margin="0,0,10,0"
                                  VerticalContentAlignment="Center" Height="30"
@@ -357,15 +387,17 @@
                         <!-- Selection Utility Buttons -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <Button Content="Select All" Command="{Binding SelectAllCommand}" 
+                                    IsEnabled="{Binding IsNotScanning}"
                                     Style="{StaticResource SecondaryButtonStyle}" Height="30" Padding="12,0" Margin="0,0,6,0"/>
                             <Button Content="Deselect All" Command="{Binding DeselectAllCommand}" 
+                                    IsEnabled="{Binding IsNotScanning}"
                                     Style="{StaticResource SecondaryButtonStyle}" Height="30" Padding="12,0"/>
                         </StackPanel>
                     </Grid>
                 </Grid>
             </Border>
 
-            <!-- 5. Candidates Grid & Docked File Inspector -->
+            <!-- 5. Candidates Grid + Loading Overlay + Empty State -->
             <Grid Grid.Row="4" Margin="0,0,0,10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -373,7 +405,8 @@
                 </Grid.RowDefinitions>
 
                 <!-- Virtualized Candidate Files ListView -->
-                <ListView Grid.Row="0" ItemsSource="{Binding DisplayFiles}" SelectedItem="{Binding SelectedFile}">
+                <ListView Grid.Row="0" ItemsSource="{Binding DisplayFiles}" SelectedItem="{Binding SelectedFile}"
+                          IsEnabled="{Binding IsNotScanning}">
                     <ListView.View>
                         <GridView>
                             <!-- Selection Checkbox -->
@@ -435,6 +468,52 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
+
+                <!-- Scanning / Loading Center Overlay over the Grid -->
+                <Border Grid.Row="0" Background="#DD10121E" CornerRadius="8"
+                        Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisConverter}}"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Border Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource PrimaryAccentBrush}"
+                            BorderThickness="1" CornerRadius="10" Padding="32,24"
+                            HorizontalAlignment="Center" VerticalAlignment="Center" Width="460">
+                        <StackPanel HorizontalAlignment="Center">
+                            <!-- Scanning Visual & Status -->
+                            <TextBlock Text="🧬" FontSize="36" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                            <TextBlock Text="Deep Scanning in Progress..." FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding StatusText}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,6,0,14"/>
+
+                            <!-- Progress Bars -->
+                            <ProgressBar Value="{Binding ScanProgress, Mode=OneWay}" Maximum="100" Height="8" Width="380"
+                                         Foreground="{DynamicResource PrimaryAccentBrush}" Background="{DynamicResource BgInputBrush}"
+                                         BorderThickness="0" Margin="0,0,0,4"/>
+                            <ProgressBar IsIndeterminate="True" Height="3" Width="380"
+                                         Foreground="{DynamicResource SecondaryAccentBrush}" Background="Transparent"
+                                         BorderThickness="0" Margin="0,0,0,14"/>
+
+                            <!-- Telemetry Percent & Speed -->
+                            <Grid Width="380" Margin="0,0,0,18">
+                                <TextBlock Text="{Binding ScanProgress, StringFormat='{}{0:F0}% Completed'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"/>
+                                <TextBlock Text="{Binding ThroughputText}" HorizontalAlignment="Right" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SuccessAccentBrush}"/>
+                            </Grid>
+
+                            <!-- Prominent Stop / Cancel Button -->
+                            <Button Content="🛑 Stop / Cancel Scan" Command="{Binding CancelScanCommand}"
+                                    Style="{StaticResource DangerButtonStyle}" Height="34" Padding="24,0" FontSize="12.5"
+                                    HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Border>
+
+                <!-- Empty State (When idle with 0 items) -->
+                <Border Grid.Row="0" Background="Transparent" IsHitTestVisible="False"
+                        Visibility="{Binding ShowEmptyState, Converter={StaticResource BoolToVisConverter}}"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel HorizontalAlignment="Center" Opacity="0.55">
+                        <TextBlock Text="🔍" FontSize="42" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                        <TextBlock Text="No Files Scanned Yet" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Select a drive on the left and click 'Start Scan' to begin data recovery." FontSize="12" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
 
                 <!-- Docked File Candidate Inspector & Hex Preview Drawer -->
                 <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Padding="12,10" Margin="0,8,0,0"
@@ -501,7 +580,7 @@
                 </Border>
             </Grid>
 
-            <!-- 6. Bottom Restoration & Safety Barrier Bar (Clean Flexible Grid) -->
+            <!-- 6. Bottom Restoration & Safety Barrier Bar -->
             <Border Grid.Row="5" Style="{StaticResource CardBorderStyle}" Padding="14,10">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -530,24 +609,28 @@
                         <!-- Label -->
                         <TextBlock Grid.Column="0" Text="Recovery Destination:" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" Margin="0,0,10,0"/>
 
-                        <!-- Stretchy Destination Input -->
+                        <!-- Stretchy Destination Input (Locked during scan) -->
                         <TextBox Grid.Column="1" Text="{Binding DestinationPath, UpdateSourceTrigger=PropertyChanged}"
+                                 IsEnabled="{Binding IsNotScanning}"
                                  Background="{DynamicResource BgInputBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
                                  BorderBrush="{DynamicResource BorderDefaultBrush}" Padding="10,4"
                                  VerticalContentAlignment="Center" Height="32" Margin="0,0,8,0"/>
 
-                        <!-- Browse & Open Action Buttons -->
+                        <!-- Browse & Open Action Buttons (Locked during scan) -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
                             <Button Content="Browse..." Click="BrowseDestination_Click"
+                                    IsEnabled="{Binding IsNotScanning}"
                                     Style="{StaticResource SecondaryButtonStyle}" Height="32" Padding="14,0" Margin="0,0,6,0"/>
                             <Button Content="📁 Open Folder" Command="{Binding OpenDestinationCommand}"
+                                    IsEnabled="{Binding IsNotScanning}"
                                     Style="{StaticResource GhostButtonStyle}" Height="32" Padding="10,0"
                                     ToolTip="Open recovery destination in Windows Explorer"/>
                         </StackPanel>
 
-                        <!-- Primary Restore CTA Button -->
+                        <!-- Primary Restore CTA Button (Locked during scan) -->
                         <Button Grid.Column="3" Content="{Binding RestoreButtonText}"
                                 Command="{Binding RestoreSelectedCommand}"
+                                IsEnabled="{Binding CanRestore}"
                                 Style="{StaticResource AccentButtonStyle}" Height="36" Padding="20,0" FontSize="12.5"/>
                     </Grid>
                 </Grid>

@@ -126,8 +126,27 @@ public class MainViewModel : INotifyPropertyChanged
     public bool IsScanning
     {
         get => _isScanning;
-        set { _isScanning = value; OnPropertyChanged(); }
+        set
+        {
+            if (_isScanning != value)
+            {
+                _isScanning = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsNotScanning));
+                OnPropertyChanged(nameof(CanStartScan));
+                OnPropertyChanged(nameof(CanCancelScan));
+                OnPropertyChanged(nameof(CanRestore));
+                OnPropertyChanged(nameof(ShowEmptyState));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
     }
+
+    public bool IsNotScanning => !IsScanning;
+    public bool CanStartScan => !IsScanning && SelectedDrive != null;
+    public bool CanCancelScan => IsScanning;
+    public bool CanRestore => !IsScanning && IsDestinationSafe && HasSelectedFiles;
+    public bool ShowEmptyState => !IsScanning && AllFiles.Count == 0;
 
     private double _scanProgress;
     public double ScanProgress
@@ -362,7 +381,7 @@ public class MainViewModel : INotifyPropertyChanged
         var progress = new Progress<ScanProgressReport>(report =>
         {
             ScanProgress = report.Percent;
-            ThroughputText = $"{report.MegaBytesPerSecond:F1} MB/s | {report.FilesFound} items";
+            ThroughputText = $"{report.MegaBytesPerSecond:F1} MB/s | {report.FilesFound} items found";
             StatusText = report.CurrentOperation;
         });
 
@@ -391,29 +410,40 @@ public class MainViewModel : INotifyPropertyChanged
             }
 
             ApplyFilter();
+            ScanProgress = 100;
             StatusText = $"Scan complete! Found {AllFiles.Count} recoverable files.";
+            ThroughputText = $"Completed ({AllFiles.Count} items)";
             ShowInfoBar($"Scan complete: Discovered {AllFiles.Count} recoverable candidates on {SelectedDrive.DriveLetter}.", "Success");
         }
         catch (OperationCanceledException)
         {
             StatusText = "Scan cancelled by user.";
+            ThroughputText = "Cancelled";
             ShowInfoBar("Scan operation cancelled.", "Info");
         }
         catch (Exception ex)
         {
             StatusText = $"Scan failed: {ex.Message}";
+            ThroughputText = "Failed";
             ShowInfoBar($"Scan failed: {ex.Message}", "Error");
         }
         finally
         {
             IsScanning = false;
+            OnPropertyChanged(nameof(ShowEmptyState));
             UpdateCategoryCounts();
         }
     }
 
     private void CancelScan()
     {
-        _scanCts?.Cancel();
+        if (_scanCts != null && !_scanCts.IsCancellationRequested)
+        {
+            StatusText = "Cancelling scan... Please wait.";
+            ThroughputText = "Aborting...";
+            _scanCts.Cancel();
+            CommandManager.InvalidateRequerySuggested();
+        }
     }
 
     private async Task ExecuteRestoreAsync()
