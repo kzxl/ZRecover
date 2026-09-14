@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ZeroRecover.Cli/ZeroRecover.Cli.csproj" />
+    <Project Path="src/ZeroRecover.Core/ZeroRecover.Core.csproj" />
+    <Project Path="src/ZeroRecover.UI/ZeroRecover.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ZeroRecover.Tests/ZeroRecover.Tests.csproj" />
+  </Folder>
+  <Project Path="../../ZeroPlatform/ZeroSystem/src/ZeroSystem.Core/ZeroSystem.Core.csproj" />
+</Solution>
