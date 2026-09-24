@@ -1,4 +1,4 @@
-﻿# 🛡️ ZRecover — Sovereign Data Recovery & Forensic Carving Suite
+# 🛡️ ZRecover — Sovereign Data Recovery & Forensic Carving Suite
 
 <p align="center">
   <a href="https://github.com/kzxl/ZRecover"><img src="https://img.shields.io/badge/Type-Desktop%20App%20%26%20CLI-007ACC?style=flat-square&logo=windows" alt="Type: Desktop App & CLI" /></a>
@@ -70,13 +70,13 @@ Launch `ZRecover.exe` (run as Administrator for raw physical drive access and di
 
 ```bash
 # Scan a volume and output recovered candidates to directory
-zerorecover scan --drive D: --output E:\Restored --carve
+zrecover scan --drive D: --output E:\Restored --carve
 
 # Scan a specific directory for user-mode recovery fallback
-zerorecover scan --path "D:\Projects\LostData" --output "E:\Recovered"
+zrecover scan --path "D:\Projects\LostData" --output "E:\Recovered"
 
 # List Volume Shadow Copies
-zerorecover vss list --drive C:
+zrecover vss list --drive C:
 ```
 
 ---
