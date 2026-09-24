@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,7 +42,7 @@ internal class Program
 
                 default:
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"[ERROR] Unknown command '{command}'. Run 'zerorecover --help' for options.");
+                    Console.WriteLine($"[ERROR] Unknown command '{command}'. Run 'zrecover --help' for options.");
                     Console.ResetColor();
                     return 1;
             }
@@ -68,7 +68,7 @@ internal class Program
 
     private static void PrintUsage()
     {
-        Console.WriteLine("\nUsage: zerorecover <command> [arguments]\n");
+        Console.WriteLine("\nUsage: zrecover <command> [arguments]\n");
         Console.WriteLine("Commands:");
         Console.WriteLine("  drives                     List all connected physical and logical storage volumes.");
         Console.WriteLine("  recycle <drive>            Forensically parse $Recycle.Bin on the specified drive.");
@@ -79,10 +79,10 @@ internal class Program
         Console.WriteLine("  --category <cat>           Filter by category: All, Documents, Pictures, Videos, Audio, Archives, Databases.");
         Console.WriteLine("  -h, --help                 Display this help screen.");
         Console.WriteLine("\nExamples:");
-        Console.WriteLine("  zerorecover drives");
-        Console.WriteLine("  zerorecover recycle C:");
-        Console.WriteLine("  zerorecover vss C:");
-        Console.WriteLine("  zerorecover carve D: --out E:\\Restored --category Pictures\n");
+        Console.WriteLine("  zrecover drives");
+        Console.WriteLine("  zrecover recycle C:");
+        Console.WriteLine("  zrecover vss C:");
+        Console.WriteLine("  zrecover carve D: --out E:\\Restored --category Pictures\n");
     }
 
     private static int ListDrives()

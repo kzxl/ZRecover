@@ -1,4 +1,4 @@
-﻿<#
+<#
     publish.ps1 — Publish script for ZRecover (Dual Mode: Full & Lite)
     Adheres to AgentOption .NET Publish Release standard & ZeroUniverse rules.
 #>
@@ -41,7 +41,7 @@ if ($Mode -eq 'Full' -or $Mode -eq 'All') {
             -p:IncludeNativeLibrariesForSelfExtract=true `
             -p:EnableCompressionInSingleFile=true `
             -o $outCliFull
-        Write-Host "  ✔ CLI Full generated at: $outCliFull\zerorecover.exe" -ForegroundColor Green
+        Write-Host "  ✔ CLI Full generated at: $outCliFull\zrecover.exe" -ForegroundColor Green
     }
 }
 
@@ -61,7 +61,7 @@ if ($Mode -eq 'Lite' -or $Mode -eq 'All') {
         dotnet publish $CliProj -c $Configuration -r $Runtime --self-contained false `
             -p:PublishSingleFile=true `
             -o $outCliLite
-        Write-Host "  ✔ CLI Lite generated at: $outCliLite\zerorecover.exe" -ForegroundColor Green
+        Write-Host "  ✔ CLI Lite generated at: $outCliLite\zrecover.exe" -ForegroundColor Green
     }
 }
 
