@@ -1,0 +1,10 @@
+﻿<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ZRecover.Cli/ZRecover.Cli.csproj" />
+    <Project Path="src/ZRecover.Core/ZRecover.Core.csproj" />
+    <Project Path="src/ZRecover.UI/ZRecover.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ZRecover.Tests/ZRecover.Tests.csproj" />
+  </Folder>
+</Solution>

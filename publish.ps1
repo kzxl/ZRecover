@@ -1,5 +1,5 @@
-<#
-    publish.ps1 — Publish script for ZeroRecover (Dual Mode: Full & Lite)
+﻿<#
+    publish.ps1 — Publish script for ZRecover (Dual Mode: Full & Lite)
     Adheres to AgentOption .NET Publish Release standard & ZeroUniverse rules.
 #>
 [CmdletBinding()]
@@ -14,15 +14,15 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $Root = $PSScriptRoot
-$UiProj = Join-Path $Root "src\ZeroRecover.UI\ZeroRecover.UI.csproj"
-$CliProj = Join-Path $Root "src\ZeroRecover.Cli\ZeroRecover.Cli.csproj"
+$UiProj = Join-Path $Root "src\ZRecover.UI\ZRecover.UI.csproj"
+$CliProj = Join-Path $Root "src\ZRecover.Cli\ZRecover.Cli.csproj"
 $Dist = Join-Path $Root "publish"
 
 # Ensure any running instances are closed before publishing
-Get-Process -Name "*ZeroRecover*", "*zrec*" -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process -Name "*ZRecover*", "*zrec*" -ErrorAction SilentlyContinue | Stop-Process -Force
 
 if ($Mode -eq 'Full' -or $Mode -eq 'All') {
-    Write-Host ">>> Publishing ZeroRecover FULL (Self-Contained Single File)..." -ForegroundColor Cyan
+    Write-Host ">>> Publishing ZRecover FULL (Self-Contained Single File)..." -ForegroundColor Cyan
     
     if ($Target -eq 'UI' -or $Target -eq 'All') {
         $outUiFull = Join-Path $Dist "ui-full"
@@ -31,7 +31,7 @@ if ($Mode -eq 'Full' -or $Mode -eq 'All') {
             -p:IncludeNativeLibrariesForSelfExtract=true `
             -p:EnableCompressionInSingleFile=true `
             -o $outUiFull
-        Write-Host "  ✔ UI Full generated at: $outUiFull\ZeroRecover.exe" -ForegroundColor Green
+        Write-Host "  ✔ UI Full generated at: $outUiFull\ZRecover.exe" -ForegroundColor Green
     }
     
     if ($Target -eq 'CLI' -or $Target -eq 'All') {
@@ -46,14 +46,14 @@ if ($Mode -eq 'Full' -or $Mode -eq 'All') {
 }
 
 if ($Mode -eq 'Lite' -or $Mode -eq 'All') {
-    Write-Host ">>> Publishing ZeroRecover LITE (Framework-Dependent Single File)..." -ForegroundColor Cyan
+    Write-Host ">>> Publishing ZRecover LITE (Framework-Dependent Single File)..." -ForegroundColor Cyan
     
     if ($Target -eq 'UI' -or $Target -eq 'All') {
         $outUiLite = Join-Path $Dist "ui-lite"
         dotnet publish $UiProj -c $Configuration -r $Runtime --self-contained false `
             -p:PublishSingleFile=true `
             -o $outUiLite
-        Write-Host "  ✔ UI Lite generated at: $outUiLite\ZeroRecover.exe" -ForegroundColor Green
+        Write-Host "  ✔ UI Lite generated at: $outUiLite\ZRecover.exe" -ForegroundColor Green
     }
     
     if ($Target -eq 'CLI' -or $Target -eq 'All') {
@@ -65,4 +65,4 @@ if ($Mode -eq 'Lite' -or $Mode -eq 'All') {
     }
 }
 
-Write-Host ">>> ZeroRecover publish completed successfully!" -ForegroundColor Green
+Write-Host ">>> ZRecover publish completed successfully!" -ForegroundColor Green

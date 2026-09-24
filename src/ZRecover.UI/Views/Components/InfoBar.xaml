@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="ZRecover.UI.Views.Components.InfoBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border x:Name="ContainerBorder" CornerRadius="6" Padding="12,8" Margin="0,0,0,10"
+            Background="{DynamicResource BgCardBrush}" BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="1">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Name="SeverityIcon" Text="ℹ" FontSize="14" FontWeight="Bold" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            <TextBlock x:Name="MessageText" Grid.Column="1" Text="{Binding InfoBarMessage}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12.5" VerticalAlignment="Center"/>
+
+            <Button Grid.Column="2" Content="✕" Command="{Binding DismissInfoBarCommand}"
+                    Background="Transparent" Foreground="{DynamicResource TextSecondaryBrush}" BorderThickness="0"
+                    FontSize="12" Width="24" Height="24" Cursor="Hand" VerticalAlignment="Center"/>
+        </Grid>
+    </Border>
+</UserControl>

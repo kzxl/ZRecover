@@ -1,11 +1,11 @@
-# 🛡️ ZeroRecover — Sovereign Data Recovery & Forensic Carving Suite
+﻿# 🛡️ ZRecover — Sovereign Data Recovery & Forensic Carving Suite
 
 <p align="center">
-  <a href="https://github.com/kzxl/ZeroRecover"><img src="https://img.shields.io/badge/Type-Desktop%20App%20%26%20CLI-007ACC?style=flat-square&logo=windows" alt="Type: Desktop App & CLI" /></a>
-  <a href="https://github.com/kzxl/ZeroRecover"><img src="https://img.shields.io/badge/Ecosystem-Zero%20Universe-8A2BE2?style=flat-square" alt="Ecosystem: Zero Universe" /></a>
-  <a href="https://github.com/kzxl/ZeroRecover"><img src="https://img.shields.io/badge/Platform-Windows%20x64%20(.NET%208)-brightgreen?style=flat-square" alt="Platform: Windows x64 (.NET 8)" /></a>
-  <a href="https://github.com/kzxl/ZeroRecover"><img src="https://img.shields.io/badge/Safety-Zero--Write%20Barrier-crimson?style=flat-square" alt="Safety: Zero-Write Barrier" /></a>
-  <a href="https://github.com/kzxl/ZeroRecover"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License: MIT" /></a>
+  <a href="https://github.com/kzxl/ZRecover"><img src="https://img.shields.io/badge/Type-Desktop%20App%20%26%20CLI-007ACC?style=flat-square&logo=windows" alt="Type: Desktop App & CLI" /></a>
+  <a href="https://github.com/kzxl/ZRecover"><img src="https://img.shields.io/badge/Ecosystem-Zero%20Universe-8A2BE2?style=flat-square" alt="Ecosystem: Zero Universe" /></a>
+  <a href="https://github.com/kzxl/ZRecover"><img src="https://img.shields.io/badge/Platform-Windows%20x64%20(.NET%208)-brightgreen?style=flat-square" alt="Platform: Windows x64 (.NET 8)" /></a>
+  <a href="https://github.com/kzxl/ZRecover"><img src="https://img.shields.io/badge/Safety-Zero--Write%20Barrier-crimson?style=flat-square" alt="Safety: Zero-Write Barrier" /></a>
+  <a href="https://github.com/kzxl/ZRecover"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License: MIT" /></a>
 </p>
 
 <p align="center">
@@ -17,11 +17,11 @@
 
 ## 📖 Overview
 
-**ZeroRecover** is a sovereign forensic data recovery and deep sector carving solution built on pure C# and Windows BCL/Win32 APIs. It enables engineers and incident responders to locate, inspect, and safely recover lost, deleted, or corrupted files across physical disks, logical volumes, and user directories.
+**ZRecover** is a sovereign forensic data recovery and deep sector carving solution built on pure C# and Windows BCL/Win32 APIs. It enables engineers and incident responders to locate, inspect, and safely recover lost, deleted, or corrupted files across physical disks, logical volumes, and user directories.
 
-Unlike typical commercial utilities that bundle proprietary background telemetry or heavy runtime runtimes, ZeroRecover adheres to a strict zero-dependency, sovereign architecture with full source inspectability and a guaranteed **Zero-Write Safety Barrier**.
+Unlike typical commercial utilities that bundle proprietary background telemetry or heavy runtime runtimes, ZRecover adheres to a strict zero-dependency, sovereign architecture with full source inspectability and a guaranteed **Zero-Write Safety Barrier**.
 
-Part of the **ZeroUniverse** application suite, ZeroRecover is designed for industrial, enterprise, and personal disaster-recovery scenarios.
+Part of the **ZeroUniverse** application suite, ZRecover is designed for industrial, enterprise, and personal disaster-recovery scenarios.
 
 ---
 
@@ -49,10 +49,10 @@ Part of the **ZeroUniverse** application suite, ZeroRecover is designed for indu
 
 | Component | Path | Description |
 | :--- | :--- | :--- |
-| **`ZeroRecover.Core`** | `src/ZeroRecover.Core/` | Recovery engine: raw sector readers, NTFS MFT parser, carvers, Shannon entropy, VSS explorer, safety barriers |
-| **`ZeroRecover.UI`** | `src/ZeroRecover.UI/` | Modern Windows Presentation Foundation (WPF) GUI with dual-tab preview, capacity visualizer, and candidate DataGrid |
-| **`ZeroRecover.Cli`** | `src/ZeroRecover.Cli/` | Headless, scriptable command-line interface for automated recovery workflows |
-| **`ZeroRecover.Tests`** | `tests/ZeroRecover.Tests/` | Comprehensive xUnit unit and integration test suite |
+| **`ZRecover.Core`** | `src/ZRecover.Core/` | Recovery engine: raw sector readers, NTFS MFT parser, carvers, Shannon entropy, VSS explorer, safety barriers |
+| **`ZRecover.UI`** | `src/ZRecover.UI/` | Modern Windows Presentation Foundation (WPF) GUI with dual-tab preview, capacity visualizer, and candidate DataGrid |
+| **`ZRecover.Cli`** | `src/ZRecover.Cli/` | Headless, scriptable command-line interface for automated recovery workflows |
+| **`ZRecover.Tests`** | `tests/ZRecover.Tests/` | Comprehensive xUnit unit and integration test suite |
 
 ---
 
@@ -60,7 +60,7 @@ Part of the **ZeroUniverse** application suite, ZeroRecover is designed for indu
 
 ### Graphical Desktop Application
 
-Launch `ZeroRecover.exe` (run as Administrator for raw physical drive access and direct MFT scanning).
+Launch `ZRecover.exe` (run as Administrator for raw physical drive access and direct MFT scanning).
 1. **Select Target**: Choose a logical drive (e.g. `C:\`, `D:\`) or a specific folder for targeted recovery.
 2. **Scan**: Click **Scan** to initiate parallel MFT analysis and sector carving.
 3. **Inspect & Preview**: Browse candidate files by category (Pictures, Documents, Archives, Media, Code), inspect file metadata, or view image previews.
@@ -91,10 +91,10 @@ zerorecover vss list --drive C:
 
 ```bash
 # Build complete solution in Release configuration
-dotnet build ZeroRecover.slnx -c Release
+dotnet build ZRecover.slnx -c Release
 
 # Run test suite
-dotnet test tests/ZeroRecover.Tests/ZeroRecover.Tests.csproj
+dotnet test tests/ZRecover.Tests/ZRecover.Tests.csproj
 
 # Produce single-file deployment package
 pwsh ./publish.ps1
